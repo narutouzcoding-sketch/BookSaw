@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BooksCatalog - Buyurtma</title>
+  <meta name="description" content="Booksaw — O'zbekistonning onlayn kitob do'koni. Original nashrlar, tezkor yetkazib berish.">
+  <meta name="theme-color" content="#1b4332">
+  <link rel="icon" href="../../static/catalog/images/favicon.svg" type="image/svg+xml">
+  <script src="../../static/catalog/js/theme-boot.js"></script>
+  <link rel="stylesheet" href="../../static/catalog/css/style.css">
+  <link rel="stylesheet" href="../../static/catalog/css/theme-tokens.css">
+  <script defer src="../../static/catalog/js/theme.js"></script>
+  <script defer src="../../static/catalog/js/shared-header.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap">
+</head>
+<body data-page="checkout">
+
+<header class="header" id="header">
+  <div class="container header__inner">
+    <a href="book_list.html" class="header__logo">
+      <img src="../../static/catalog/images/main-logo.png" alt="Booksaw">
+    </a>
+    
+    <div class="header__search">
+      <input type="text" id="searchInput" placeholder="Kitob, muallif yoki kalit so'z qidiring..." autocomplete="off">
+      <button class="header__search-btn" aria-label="Qidirish"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span></button>
+      <div class="search-suggestions" id="searchSuggestions"></div>
+    </div>
+    
+    <div class="header__actions">
+      <div class="header__action-item">
+        <button class="header__action-btn" id="categoriesToggle" title="Kategoriyalar"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></span></button>
+      </div>
+      <div class="header__action-item">
+        <a href="wishlist.html" class="header__action-btn" title="Sevimlilar"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span><span class="badge-count" id="wishlistBadge">0</span></a>
+      </div>
+      <div class="header__action-item">
+        <button class="header__action-btn" id="cartToggle" title="Savat"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L23 6H6"/></svg></span><span class="badge-count" id="cartBadge">0</span></button>
+        <div class="mini-cart" id="miniCart">
+          <div class="mini-cart__header"><h4>Savatingiz</h4></div>
+          <div class="mini-cart__items" id="miniCartItems"><p class="text-center text-muted">Savat bo'sh</p></div>
+          <div class="mini-cart__footer">
+            <div class="flex-between"><strong>Jami:</strong><strong id="miniCartTotal">0 so'm</strong></div>
+            <a href="cart.html" class="btn btn-primary" style="width:100%;margin-top:12px;text-align:center;">Savatga o'tish</a>
+          </div>
+        </div>
+      </div>
+      <div class="header__action-item">
+        <button class="header__action-btn" id="userToggle" title="Profil"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span></button>
+        <div class="user-dropdown" id="userDropdown">
+          <div id="userDropdownContent"></div>
+        </div>
+      </div>
+      <button class="header__hamburger mobile-only" id="hamburgerBtn" aria-label="Menyu"><span class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg></span></button>
+    </div>
+  </div>
+  <!-- Categories mega menu -->
+  <div class="categories-dropdown" id="categoriesDropdown"></div>
+</header>
+
+<!-- Mobile menu -->
+<div class="mobile-menu-overlay" id="mobileOverlay"></div>
+<nav class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu__header">
+    <img src="../../static/catalog/images/main-logo.png" alt="Logo" style="height:30px">
+    <button id="closeMobileMenu" aria-label="Yopish"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span></button>
+  </div>
+  <div class="mobile-menu__search">
+    <input type="text" placeholder="Qidirish...">
+  </div>
+  <ul class="mobile-menu__links">
+    <li><a href="book_list.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Bosh sahifa</a></li>
+    <li><a href="categories.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></span> Kategoriyalar</a></li>
+    <li><a href="cart.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L23 6H6"/></svg></span> Savat</a></li>
+    <li><a href="wishlist.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span> Sevimlilar</a></li>
+    <li><a href="profile.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Profil</a></li>
+    <li><a href="orders.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/></svg></span> Buyurtmalarim</a></li>
+    <li><a href="login.html"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg></span> Kirish</a></li>
+  </ul>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="container checkout-page">
+  <nav class="breadcrumb" style="margin-bottom:20px; padding:0;">
+    <a href="book_list.html">Bosh sahifa</a> <span>/</span>
+    <a href="cart.html">Savat</a> <span>/</span>
+    <span>Buyurtmani rasmiylashtirish</span>
+  </nav>
+  <h1 class="section-title" style="margin-bottom:32px"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/></svg></span> Buyurtma berish</h1>
+  
+  <!-- Stepper -->
+  <div class="stepper" id="checkoutStepper">
+    <div class="stepper__step active" data-step="1">
+      <div class="stepper__num">1</div>
+      <div class="stepper__label">Manzil</div>
+    </div>
+    <div class="stepper__step" data-step="2">
+      <div class="stepper__num">2</div>
+      <div class="stepper__label">Yetkazib berish</div>
+    </div>
+    <div class="stepper__step" data-step="3">
+      <div class="stepper__num">3</div>
+      <div class="stepper__label">To'lov</div>
+    </div>
+    <div class="stepper__step" data-step="4">
+      <div class="stepper__num">4</div>
+      <div class="stepper__label">Tasdiqlash</div>
+    </div>
+  </div>
+  
+  <div class="checkout__layout">
+    <div class="checkout__steps">
+      <!-- Step 1: Address -->
+      <div class="checkout__step active" id="step1">
+        <h2 style="margin-bottom:20px"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span> Yetkazib berish manzili</h2>
+        <div id="addressList"></div>
+        <div style="margin-top:20px">
+          <h3 style="margin-bottom:12px">Yangi manzil qo'shish</h3>
+          <div class="form-group"><label class="form-label">To'liq ism</label><input class="form-input" id="addrName" placeholder="Ismingiz"></div>
+          <div class="form-group"><label class="form-label">Telefon</label><input class="form-input" id="addrPhone" placeholder="+998 xx xxx xx xx"></div>
+          <div class="form-group"><label class="form-label">Shahar</label><input class="form-input" id="addrCity" placeholder="Toshkent"></div>
+          <div class="form-group"><label class="form-label">Manzil</label><input class="form-input" id="addrAddress" placeholder="Ko'cha, uy raqami"></div>
+          <button class="btn btn-secondary" id="saveAddrBtn">Manzilni saqlash</button>
+        </div>
+        <div class="checkout-nav"><button type="button" class="btn btn-primary" id="toStep2">Keyingi →</button></div>
+      </div>
+      
+      <!-- Step 2: Delivery -->
+      <div class="checkout__step" id="step2">
+        <h2 style="margin-bottom:20px"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></span> Yetkazib berish usuli</h2>
+        <div id="deliveryOptions"></div>
+        <div class="checkout-nav"><button type="button" class="btn btn-secondary" id="backToStep1">← Orqaga</button><button type="button" class="btn btn-primary" id="toStep3">Keyingi →</button></div>
+      </div>
+      
+      <!-- Step 3: Payment -->
+      <div class="checkout__step" id="step3">
+        <h2 style="margin-bottom:20px"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> To'lov usuli</h2>
+        <div id="paymentOptions"></div>
+        <div class="checkout-nav"><button type="button" class="btn btn-secondary" id="backToStep2">← Orqaga</button><button type="button" class="btn btn-primary" id="toStep4">Keyingi →</button></div>
+      </div>
+      
+      <!-- Step 4: Confirm -->
+      <div class="checkout__step" id="step4">
+        <h2 style="margin-bottom:20px">✅ Buyurtmani tasdiqlash</h2>
+        <div id="orderReview"></div>
+        <div class="checkout-nav"><button type="button" class="btn btn-secondary" id="backToStep3">← Orqaga</button><button type="button" class="btn btn-primary btn-lg" id="placeOrderBtn">Buyurtmani tasdiqlash</button></div>
+      </div>
+    </div>
+    
+    <!-- Order Summary Sidebar -->
+    <div class="order-summary-sidebar" id="checkoutSummary">
+      <h3 style="margin-bottom:20px">Buyurtma tarkibi</h3>
+      <div id="checkoutItems"></div>
+      <div class="cart__summary-row" style="margin-top:16px"><span>Mahsulotlar:</span><span id="checkoutSubtotal">0 so'm</span></div>
+      <div class="cart__summary-row"><span>Chegirma:</span><span id="checkoutDiscount">0 so'm</span></div>
+      <div class="cart__summary-row"><span>Yetkazib berish:</span><span id="checkoutDelivery">0 so'm</span></div>
+      <div class="cart__summary-total"><span>Jami:</span><span id="checkoutTotal">0 so'm</span></div>
+    </div>
+  </div>
+  
+  <!-- Success page (hidden) -->
+  <div class="success-page" id="orderSuccess" style="display:none;">
+    <div class="success-page__icon" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </div>
+    <h1>Buyurtma qabul qilindi!</h1>
+    <p class="success-page__lead">Buyurtma raqamingiz:</p>
+    <div class="order-chip">
+      <span id="orderNumber">#000000</span>
+      <button type="button" class="order-chip__copy" id="copyOrderId" aria-label="Nusxa olish">Nusxa</button>
+    </div>
+    <p class="success-page__text">Buyurtmangiz tez orada tayyorlanadi. Batafsil ma'lumot uchun buyurtmalar sahifasini tekshiring.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="orders.html" class="btn btn-primary"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/></svg></span> Buyurtmalarni ko'rish</a>
+      <a href="book_list.html" class="btn btn-secondary"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Bosh sahifaga</a>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__col">
+        <div class="footer__brand">
+          <img src="../../static/catalog/images/main-logo__white.png" alt="Booksaw" class="footer__logo">
+          <p>O'zbekistonning eng yirik onlayn kitob do'koni. Minglab kitoblar, tezkor yetkazib berish va eng yaxshi narxlar.</p>
+        </div>
+        <div class="footer__social">
+          <a href="https://t.me/" class="btn-icon" title="Telegram" target="_blank" rel="noopener"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></span></a>
+          <a href="https://instagram.com/" class="btn-icon" title="Instagram" target="_blank" rel="noopener"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></span></a>
+          <a href="https://facebook.com/" class="btn-icon" title="Facebook" target="_blank" rel="noopener"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span></a>
+          <a href="https://youtube.com/" class="btn-icon" title="YouTube" target="_blank" rel="noopener"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span></a>
+        </div>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__title">Foydali havolalar</h4>
+        <ul class="footer__links">
+          <li><a href="info.html?page=about">Biz haqimizda</a></li>
+          <li><a href="info.html?page=delivery">Yetkazib berish</a></li>
+          <li><a href="info.html?page=returns">Qaytarish siyosati</a></li>
+          <li><a href="info.html?page=help">Yordam markazi</a></li>
+          <li><a href="info.html?page=blog">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__title">Kategoriyalar</h4>
+        <ul class="footer__links">
+          <li><a href="book_list.html">Badiiy adabiyot</a></li>
+          <li><a href="book_list.html">Biznes va Rivojlanish</a></li>
+          <li><a href="book_list.html">IT va Dasturlash</a></li>
+          <li><a href="book_list.html">Bolalar adabiyoti</a></li>
+          <li><a href="book_list.html">Psixologiya</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__title">Aloqa</h4>
+        <ul class="footer__links">
+          <li><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span> +998 (71) 200-00-00</li>
+          <li><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> info@bookscatalog.uz</li>
+          <li><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span> Toshkent, Amir Temur ko'chasi 1</li>
+        </ul>
+        <div class="store-badges">
+          <a href="https://play.google.com/store" target="_blank" rel="noopener" aria-label="Google Play"><img src="../../static/catalog/images/google-play.png" alt="Google Play" class="store-badge" width="135" height="40"></a>
+          <a href="https://apps.apple.com" target="_blank" rel="noopener" aria-label="App Store"><img src="../../static/catalog/images/app-store.png" alt="App Store" class="store-badge" width="135" height="40"></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2026 Booksaw. Barcha huquqlar himoyalangan.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Bottom Navigation (Mobile) -->
+<nav class="bottom-nav" id="bottomNav">
+  <a href="book_list.html" class="bottom-nav__item" data-page="home"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><small>Bosh sahifa</small></a>
+  <a href="categories.html" class="bottom-nav__item" data-page="categories"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></span><small>Kategoriyalar</small></a>
+  <a href="cart.html" class="bottom-nav__item" data-page="cart"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57L23 6H6"/></svg></span><span class="badge-count cart-badge-bottom" id="cartBadgeBottom">0</span><small>Savat</small></a>
+  <a href="wishlist.html" class="bottom-nav__item" data-page="wishlist"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span><span class="badge-count wishlist-badge-bottom" id="wishlistBadgeBottom">0</span><small>Sevimlilar</small></a>
+  <a href="profile.html" class="bottom-nav__item" data-page="profile"><span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><small>Profil</small></a>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script src="../../static/catalog/js/config.js"></script>
+<script src="../../static/catalog/js/data.js"></script>
+<script src="../../static/catalog/js/api.js"></script>
+<script src="../../static/catalog/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booksaw — Ro'yxatdan o'tish</title>
+  <meta name="description" content="Booksaw hisobini oching va xaridni boshlang.">
+  <meta name="theme-color" content="#e6ecf5">
+  <link rel="icon" href="../../static/catalog/images/favicon.svg" type="image/svg+xml">
+  <script src="../../static/catalog/js/theme-boot.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../../static/catalog/css/style.css">
+  <link rel="stylesheet" href="../../static/catalog/css/theme-tokens.css">
+  <script defer src="../../static/catalog/js/theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="neu-auth-page" data-page="register">
+
+  <button type="button" class="header__action-btn theme-toggle theme-toggle--3d theme-toggle--float" id="authThemeToggle" title="Tungi / Kunduzgi rejim" aria-label="Mavzuni almashtirish">
+    <div class="switch-chassis compact" role="button" aria-label="Rejimni almashtirish">
+      <div class="switch-track">
+        <div class="track-icon">
+          <svg viewBox="0 0 32 32">
+            <circle cx="16" cy="16" r="6"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/>
+            <rect x="14.5" y="25.5" width="3" height="4.5" rx="1.5"/>
+            <rect x="2" y="14.5" width="4.5" height="3" rx="1.5"/>
+            <rect x="25.5" y="14.5" width="4.5" height="3" rx="1.5"/>
+            <rect x="5.5" y="6" width="4.5" height="3" rx="1.5" transform="rotate(45 7.75 7.5)"/>
+            <rect x="22" y="22.5" width="4.5" height="3" rx="1.5" transform="rotate(45 24.25 24)"/>
+            <rect x="22.5" y="6.5" width="3" height="4.5" rx="1.5" transform="rotate(45 24 8.75)"/>
+            <rect x="6" y="23" width="3" height="4.5" rx="1.5" transform="rotate(45 7.5 25.25)"/>
+          </svg>
+        </div>
+        <div class="track-icon">
+          <svg viewBox="0 0 32 32">
+            <path d="M21 16.5C20.8 12.2 17.8 8.8 13.8 8C14.8 9.5 15.3 11.2 15.3 13C15.3 17.4 11.7 21 7.3 21C6.3 21 5.3 20.8 4.5 20.4C5.6 23.6 8.8 26 12.5 26C17.2 26 21 22.2 21 17.5V16.5Z"/>
+            <path d="M22 6L22.8 8.2L25 9L22.8 9.8L22 12L21.2 9.8L19 9L21.2 8.2L22 6Z"/>
+            <rect x="7" y="27.5" width="15" height="2" rx="1"/>
+            <rect x="10" y="30.5" width="9" height="1.8" rx="0.9"/>
+          </svg>
+        </div>
+        <div class="thumb-slider">
+          <div class="thumb-icons-wrapper">
+            <div class="thumb-icon icon-sun">
+              <svg viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="6"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/>
+                <rect x="14.5" y="25.5" width="3" height="4.5" rx="1.5"/>
+                <rect x="2" y="14.5" width="4.5" height="3" rx="1.5"/>
+                <rect x="25.5" y="14.5" width="4.5" height="3" rx="1.5"/>
+                <rect x="5.5" y="6" width="4.5" height="3" rx="1.5" transform="rotate(45 7.75 7.5)"/>
+                <rect x="22" y="22.5" width="4.5" height="3" rx="1.5" transform="rotate(45 24.25 24)"/>
+                <rect x="22.5" y="6.5" width="3" height="4.5" rx="1.5" transform="rotate(45 24 8.75)"/>
+                <rect x="6" y="23" width="3" height="4.5" rx="1.5" transform="rotate(45 7.5 25.25)"/>
+              </svg>
+            </div>
+            <div class="thumb-icon icon-moon">
+              <svg viewBox="0 0 32 32">
+                <path d="M21 16.5C20.8 12.2 17.8 8.8 13.8 8C14.8 9.5 15.3 11.2 15.3 13C15.3 17.4 11.7 21 7.3 21C6.3 21 5.3 20.8 4.5 20.4C5.6 23.6 8.8 26 12.5 26C17.2 26 21 22.2 21 17.5V16.5Z"/>
+                <path d="M22 6L22.8 8.2L25 9L22.8 9.8L22 12L21.2 9.8L19 9L21.2 8.2L22 6Z"/>
+                <rect x="7" y="27.5" width="15" height="2" rx="1"/>
+                <rect x="10" y="30.5" width="9" height="1.8" rx="0.9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </button>
+
+  <div class="neu-bg-shape neu-bg-shape--1"></div>
+  <div class="neu-bg-shape neu-bg-shape--2"></div>
+
+  <a href="book_list.html" class="neu-back-link" title="Bosh sahifaga qaytish">
+    <i class="fa-solid fa-arrow-left"></i> <span>Do'konga qaytish</span>
+  </a>
+
+  <div class="neu-brand-top">
+    <a href="book_list.html" title="Booksaw bosh sahifasiga qaytish">
+      <img src="../../static/catalog/images/main-logo.png" alt="Booksaw" class="neu-brand-logo">
+    </a>
+  </div>
+
+  <div class="card-container" id="cardContainer">
+    <!-- LOGIN CARD (FRONT) -->
+    <div class="card login-card">
+      <div class="icon-badge"><i class="fa-solid fa-lock"></i></div>
+      <h2>Xush kelibsiz</h2>
+      <p class="subtitle">Hisobingizga kiring va mutolaadan zavqlaning</p>
+
+      <form id="loginForm" novalidate>
+        <div class="input-group">
+          <label for="loginEmail">Elektron pochta yoki telefon</label>
+          <input type="text" class="input-box" id="loginEmail" name="email" placeholder="nomingiz@mail.com yoki +998..." required autocomplete="username">
+          <span class="neu-input-error" id="loginEmailError">Email yoki telefon raqamingizni to'g'ri kiriting</span>
+        </div>
+
+        <div class="input-group">
+          <label for="loginPassword">Parol</label>
+          <input type="password" class="input-box pass-input" id="loginPassword" name="password" placeholder="••••••••" required minlength="6" autocomplete="current-password">
+          <i class="fa-solid fa-eye toggle-pass" data-target="loginPassword" title="Parolni ko'rsatish/yashirish"></i>
+          <span class="neu-input-error" id="loginPasswordError">Parol kamida 6 ta belgi bo'lsin</span>
+        </div>
+
+        <div class="options-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="rememberMe" checked>
+            <span>Meni eslab qolish</span>
+          </label>
+          <button type="button" class="forgot-link" id="forgotPassBtn">Parolni unutdingizmi?</button>
+        </div>
+
+        <button type="submit" class="btn-submit" id="loginBtn">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>TIZIMGA KIRISH</span>
+        </button>
+      </form>
+
+      <div class="switch-section">
+        <span>Akkauntingiz yo'qmi?</span>
+        <button type="button" class="circle-btn" id="flipToRegister" title="Ro'yxatdan o'tish"><i class="fa-solid fa-user-plus"></i></button>
+      </div>
+
+      <div class="social-row">
+        <button type="button" class="social-btn" data-social="google" title="Google orqali kirish"><i class="fa-brands fa-google"></i></button>
+        <button type="button" class="social-btn" data-social="telegram" title="Telegram orqali kirish"><i class="fa-brands fa-telegram"></i></button>
+      </div>
+    </div>
+
+    <!-- SIGNUP CARD (BACK) -->
+    <div class="card signup-card">
+      <div class="icon-badge"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+      <h2>Hisob yaratish</h2>
+      <p class="subtitle">Booksaw kitoblar olamiga xush kelibsiz</p>
+
+      <form id="registerForm" novalidate>
+        <div class="input-group">
+          <label for="regName">To'liq ism</label>
+          <input type="text" class="input-box" id="regName" name="name" placeholder="Ism Familiya" required minlength="2" autocomplete="name">
+          <span class="neu-input-error" id="regNameError">Ism kamida 2 ta belgi bo'lishi kerak</span>
+        </div>
+
+        <div class="input-group">
+          <label for="regEmail">Elektron pochta</label>
+          <input type="email" class="input-box" id="regEmail" name="email" placeholder="nomingiz@mail.com" required autocomplete="email">
+          <span class="neu-input-error" id="regEmailError">To'g'ri email manzil kiriting</span>
+        </div>
+
+        <div class="input-group">
+          <label for="regPhone">Telefon raqam</label>
+          <input type="tel" class="input-box" id="regPhone" name="phone" placeholder="+998 90 123 45 67" required autocomplete="tel">
+          <span class="neu-input-error" id="regPhoneError">Telefon raqam kiriting (+998...)</span>
+        </div>
+
+        <div class="input-group">
+          <label for="regPassword">Parol</label>
+          <input type="password" class="input-box pass-input" id="regPassword" name="password" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+          <i class="fa-solid fa-eye toggle-pass" data-target="regPassword" title="Parolni ko'rsatish/yashirish"></i>
+          <span class="neu-input-error" id="regPasswordError">Parol kamida 6 ta belgi bo'lsin</span>
+        </div>
+        <div class="neu-strength-meter" id="passStrengthMeter" style="display:none;">
+          <div class="neu-strength-bar" id="strBar1"></div>
+          <div class="neu-strength-bar" id="strBar2"></div>
+          <div class="neu-strength-bar" id="strBar3"></div>
+        </div>
+
+        <div class="input-group">
+          <label for="regConfirm">Parolni tasdiqlang</label>
+          <input type="password" class="input-box pass-input" id="regConfirm" name="confirm" placeholder="••••••••" required autocomplete="new-password">
+          <i class="fa-solid fa-eye toggle-pass" data-target="regConfirm" title="Parolni ko'rsatish/yashirish"></i>
+          <span class="neu-input-error" id="regConfirmError">Parollar mos kelmadi</span>
+        </div>
+
+        <div class="options-row" style="margin: 6px 0 16px;">
+          <label class="checkbox-label" style="font-size:11px;">
+            <input type="checkbox" id="regTerms" checked required>
+            <span><a href="info.html?page=terms" target="_blank" style="color:var(--neu-accent);text-decoration:underline;">Foydalanish shartlari</a> va Maxfiylik</span>
+          </label>
+          <span class="neu-input-error" id="regTermsError" style="margin:0;">Shartlarni qabul qiling</span>
+        </div>
+
+        <button type="submit" class="btn-submit" id="registerBtn">
+          <i class="fa-solid fa-user-check"></i>
+          <span>RO'YXATDAN O'TISH</span>
+        </button>
+      </form>
+
+      <div class="switch-section">
+        <span>Akkauntingiz bormi?</span>
+        <button type="button" class="circle-btn" id="flipToLogin" title="Kirish"><i class="fa-solid fa-arrow-left"></i></button>
+      </div>
+
+      <div class="social-row">
+        <button type="button" class="social-btn" data-social="google" title="Google orqali ro'yxatdan o'tish"><i class="fa-brands fa-google"></i></button>
+        <button type="button" class="social-btn" data-social="telegram" title="Telegram orqali ro'yxatdan o'tish"><i class="fa-brands fa-telegram"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="forgotModal">
+    <div class="modal neu-modal forgot-modal" style="max-width:380px;">
+      <h3 style="font-size:20px;font-weight:700;margin-bottom:6px;">Parolni tiklash</h3>
+      <p style="font-size:13px;margin-bottom:18px;">Emailingizni yozing — tiklash havolasini yuboramiz.</p>
+      <div class="input-group" style="margin-bottom:20px;">
+        <label for="forgotEmail">Email Address</label>
+        <input type="email" class="input-box" id="forgotEmail" placeholder="nomingiz@mail.com">
+      </div>
+      <div style="display:flex;gap:12px;justify-content:flex-end;">
+        <button type="button" class="btn-submit" id="forgotCancel" style="width:auto;padding:10px 18px;font-size:13px;">Bekor qilish</button>
+        <button type="button" class="btn-submit success" id="forgotSend" style="width:auto;padding:10px 22px;font-size:13px;">Yuborish</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <script src="../../static/catalog/js/config.js"></script>
+  <script src="../../static/catalog/js/data.js"></script>
+  <script src="../../static/catalog/js/api.js"></script>
+  <script src="../../static/catalog/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var authToggle = document.getElementById('authThemeToggle');
+      if (authToggle) {
+        authToggle.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (window.BooksawTheme && typeof window.BooksawTheme.toggle === 'function') {
+            window.BooksawTheme.toggle();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

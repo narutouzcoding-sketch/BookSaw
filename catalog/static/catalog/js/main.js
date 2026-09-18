@@ -98,7 +98,7 @@ const Theme = {
       <div class="switch-chassis compact" role="button" aria-label="Rejimni almashtirish">
         <div class="switch-track">
           <div class="track-icon">
-            <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="6"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/><rect x="14.5" y="25.5" width="3" height="4.5" rx="1.5"/><rect x="2" y="14.5" width="4.5" height="3" rx="1.5"/><rect x="25.5" y="14.5" width="4.5" height="3" rx="1.5"/><rect x="5.5" y="6" width="4.5" height="3" rx="1.5" transform="rotate(45 7.75 7.5)"/><rect x="22" y="22.5" width="4.5" height="3" rx="1.5" transform="rotate(45 24.25 24)"/><rect x="22.5" y="6.5" width="3" height="4.5" rx="1.5" transform="rotate(45 24 8.75)"/><rect x="6" y="23" width="3" height="4.5" rx="1.5" transform="rotate(45 7.5 25.25)"/></svg>
+            <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="6"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(45 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(90 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(135 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(180 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(225 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(270 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(315 16 16)"/></svg>
           </div>
           <div class="track-icon">
             <svg viewBox="0 0 32 32"><path d="M21 16.5C20.8 12.2 17.8 8.8 13.8 8C14.8 9.5 15.3 11.2 15.3 13C15.3 17.4 11.7 21 7.3 21C6.3 21 5.3 20.8 4.5 20.4C5.6 23.6 8.8 26 12.5 26C17.2 26 21 22.2 21 17.5V16.5Z"/><path d="M22 6L22.8 8.2L25 9L22.8 9.8L22 12L21.2 9.8L19 9L21.2 8.2L22 6Z"/><rect x="7" y="27.5" width="15" height="2" rx="1"/><rect x="10" y="30.5" width="9" height="1.8" rx="0.9"/></svg>
@@ -106,7 +106,7 @@ const Theme = {
           <div class="thumb-slider">
             <div class="thumb-icons-wrapper">
               <div class="thumb-icon icon-sun">
-                <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="6"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/><rect x="14.5" y="25.5" width="3" height="4.5" rx="1.5"/><rect x="2" y="14.5" width="4.5" height="3" rx="1.5"/><rect x="25.5" y="14.5" width="4.5" height="3" rx="1.5"/><rect x="5.5" y="6" width="4.5" height="3" rx="1.5" transform="rotate(45 7.75 7.5)"/><rect x="22" y="22.5" width="4.5" height="3" rx="1.5" transform="rotate(45 24.25 24)"/><rect x="22.5" y="6.5" width="3" height="4.5" rx="1.5" transform="rotate(45 24 8.75)"/><rect x="6" y="23" width="3" height="4.5" rx="1.5" transform="rotate(45 7.5 25.25)"/></svg>
+                <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="6"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(45 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(90 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(135 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(180 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(225 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(270 16 16)"/><rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(315 16 16)"/></svg>
               </div>
               <div class="thumb-icon icon-moon">
                 <svg viewBox="0 0 32 32"><path d="M21 16.5C20.8 12.2 17.8 8.8 13.8 8C14.8 9.5 15.3 11.2 15.3 13C15.3 17.4 11.7 21 7.3 21C6.3 21 5.3 20.8 4.5 20.4C5.6 23.6 8.8 26 12.5 26C17.2 26 21 22.2 21 17.5V16.5Z"/><path d="M22 6L22.8 8.2L25 9L22.8 9.8L22 12L21.2 9.8L19 9L21.2 8.2L22 6Z"/><rect x="7" y="27.5" width="15" height="2" rx="1"/><rect x="10" y="30.5" width="9" height="1.8" rx="0.9"/></svg>
@@ -274,14 +274,17 @@ function runBinEatAnimation(button, onComplete) {
   }, Math.max(200, totalEatTime - 40));
 }
 
-function requireAuth(message = "Bu amalni bajarish uchun tizimga kiring") {
+function requireAuth(message = "Bu amalni bajarish uchun tizimga kiring", delay = 450) {
   if (!Store.isLoggedIn()) {
+    if (location.pathname.includes('login') || location.pathname.includes('register')) {
+      return false;
+    }
     UI.showToast(message, "info", 2500);
     const currentPath = location.pathname.split('/').pop() || 'book_list.html';
     const redirectUrl = currentPath + location.search;
     setTimeout(() => {
       location.href = `login.html?redirect=${encodeURIComponent(redirectUrl)}`;
-    }, 600);
+    }, delay);
     return false;
   }
   return true;
@@ -474,6 +477,25 @@ const Store = {
     return { added: !exists };
   },
   isInWishlist(id) { return this.getWishlist().includes(id); },
+
+  // --- PASSWORD HASHING (Security Hardening) ---
+  hashPassword(pwd) {
+    if (!pwd) return '';
+    let hash = 0x811c9dc5;
+    const str = 'bksaw_salt_' + pwd;
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = (hash * 0x01000193) >>> 0;
+    }
+    return 'h_' + hash.toString(16).padStart(8, '0');
+  },
+  verifyPassword(inputPwd, storedHashOrPwd) {
+    if (!storedHashOrPwd) return true;
+    if (storedHashOrPwd.startsWith('h_')) {
+      return this.hashPassword(inputPwd) === storedHashOrPwd;
+    }
+    return inputPwd === storedHashOrPwd || this.hashPassword(inputPwd) === this.hashPassword(storedHashOrPwd);
+  },
 
   // --- AUTH & USER REGISTRY ---
   getAllUsers() {
@@ -724,6 +746,24 @@ const Store = {
         } catch {}
       }
 
+      // Transfer active guest wishlist items into this user's wishlist
+      const guestWlRaw = localStorage.getItem('marketplace_wishlist_guest');
+      if (guestWlRaw) {
+        try {
+          const guestWl = JSON.parse(guestWlRaw);
+          if (Array.isArray(guestWl) && guestWl.length > 0) {
+            const scopedWlKey = 'marketplace_wishlist_' + userKey;
+            const currentWl = JSON.parse(localStorage.getItem(scopedWlKey) || '[]');
+            guestWl.forEach(id => {
+              if (!currentWl.includes(id)) currentWl.push(id);
+            });
+            localStorage.setItem(scopedWlKey, JSON.stringify(currentWl));
+            localStorage.removeItem('marketplace_wishlist_guest');
+            user.wishlist = currentWl;
+          }
+        } catch {}
+      }
+
       try {
         localStorage.setItem('marketplace_user', JSON.stringify(user));
         localStorage.setItem('booksaw_user', JSON.stringify(user));
@@ -741,7 +781,8 @@ const Store = {
   login(emailOrUser, password) {
     const found = this.findUser(emailOrUser);
     if (found) {
-      if (password && !found.password) found.password = password;
+      if (password) found.passwordHash = this.hashPassword(password);
+      delete found.password;
       return this.setUser(found);
     }
     const cleanId = 'usr_' + String(emailOrUser || 'user').toLowerCase().replace(/[^a-z0-9]/g, '_');
@@ -753,7 +794,7 @@ const Store = {
       username: '@' + (isEmail ? emailOrUser.split('@')[0] : emailOrUser).toLowerCase().replace(/[^a-z0-9_]/g, '_'),
       email: isEmail ? emailOrUser : '',
       phone: !isEmail ? emailOrUser : '',
-      password: password || '',
+      passwordHash: password ? this.hashPassword(password) : '',
       avatar: null,
       cart: [],
       wishlist: [],
@@ -767,7 +808,8 @@ const Store = {
     const existing = this.findUser(email) || this.findUser(phone) || (username ? this.findUser(username) : null);
     if (existing) {
       if (name && !existing.name) existing.name = name;
-      if (password && !existing.password) existing.password = password;
+      if (password) existing.passwordHash = this.hashPassword(password);
+      delete existing.password;
       return this.setUser(existing);
     }
     const handle = username ? (username.startsWith('@') ? username : '@' + username) : ('@' + (email ? email.split('@')[0] : (name || 'user').toLowerCase().replace(/\s+/g, '_')));
@@ -778,7 +820,7 @@ const Store = {
       username: handle,
       email: email || '',
       phone: phone || '',
-      password: password || '',
+      passwordHash: password ? this.hashPassword(password) : '',
       avatar: null,
       cart: [],
       wishlist: [],
@@ -943,6 +985,15 @@ const Store = {
    2. UI UTILITIES
    ======================================================================== */
 const UI = {
+  escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
   showToast(message, type = 'success', duration = 3000) {
     let c = document.getElementById('toastContainer');
     if (!c) { c = document.createElement('div'); c.className = 'toast-container'; c.id = 'toastContainer'; document.body.appendChild(c); }
@@ -980,8 +1031,8 @@ const UI = {
     return { close };
   },
 
-  showConfirm(msg, onConfirm) {
-    const html = `<div style="text-align:center;padding:20px"><h3 style="margin-bottom:12px">Tasdiqlash</h3><p style="margin-bottom:24px;color:var(--gray-500)">${msg}</p><div style="display:flex;gap:12px;justify-content:center"><button class="btn btn-secondary" id="confirmCancel">Bekor qilish</button><button class="btn btn-primary" id="confirmOk" style="background:var(--danger)">Ha, o'chirish</button></div></div>`;
+  showConfirm(msg, onConfirm, okText = "Ha, tasdiqlash") {
+    const html = `<div style="text-align:center;padding:20px"><h3 style="margin-bottom:12px">Tasdiqlash</h3><p style="margin-bottom:24px;color:var(--gray-500)">${this.escapeHtml(msg)}</p><div style="display:flex;gap:12px;justify-content:center"><button class="btn btn-secondary" id="confirmCancel">Bekor qilish</button><button class="btn btn-primary" id="confirmOk" style="background:var(--danger)">${this.escapeHtml(okText)}</button></div></div>`;
     const { close } = this.showModal(html);
     document.getElementById('confirmCancel').onclick = close;
     document.getElementById('confirmOk').onclick = () => { close(); onConfirm(); };
@@ -1218,7 +1269,8 @@ const UI = {
           if (typeof onSuccess === 'function') onSuccess(existing);
           else {
             setTimeout(() => {
-              if (onAuthPage) location.href = 'book_list.html';
+              const targetUrl = new URLSearchParams(location.search).get('redirect') || 'book_list.html';
+              if (onAuthPage) location.href = targetUrl;
               else location.reload();
             }, 400);
           }
@@ -1612,7 +1664,8 @@ const UI = {
           if (typeof onSuccess === 'function') onSuccess();
           else {
             setTimeout(() => {
-              if (onAuthPage) location.href = 'book_list.html';
+              const targetUrl = new URLSearchParams(location.search).get('redirect') || 'book_list.html';
+              if (onAuthPage) location.href = targetUrl;
               else location.reload();
             }, 400);
           }
@@ -1857,8 +1910,9 @@ const UI = {
         if (typeof onSuccess === 'function') onSuccess();
         else {
           setTimeout(() => {
+            const targetUrl = new URLSearchParams(location.search).get('redirect') || 'book_list.html';
             if (location.pathname.includes('login') || location.pathname.includes('register')) {
-              location.href = 'book_list.html';
+              location.href = targetUrl;
             } else {
               location.reload();
             }
@@ -2009,50 +2063,62 @@ const Search = {
     });
 
     document.addEventListener('click', e => {
-  // 1. SEVIMLILAR (WISHLIST) TUGMASI BOSILGANDA
-  const wlBtn = e.target.closest('.product-card__wishlist, .quick-view__wishlist-btn');
-  if (wlBtn) {
-    e.preventDefault();
-    e.stopPropagation();
+      // 0. HIMOYALANGAN SAHIFALARGA BO'LGAN HAVOLALAR (VARIANT 1)
+      const protectedLink = e.target.closest('a[href*="cart.html"], a[href*="wishlist.html"], a[href*="checkout.html"], a[href*="profile.html"], a[href*="orders.html"]');
+      if (protectedLink && !Store.isLoggedIn()) {
+        e.preventDefault();
+        e.stopPropagation();
+        const href = protectedLink.getAttribute('href') || 'cart.html';
+        const pageName = href.includes('cart') ? 'Savatni' :
+                         href.includes('wishlist') ? "Sevimlilar ro'yxatini" :
+                         href.includes('checkout') ? 'Buyurtma berish sahifasini' :
+                         href.includes('profile') ? 'Profilingizni' : 'Buyurtmalaringizni';
+        UI.showToast(`${pageName} ko'rish uchun avval hisobingizga kiring!`, "info", 2500);
+        setTimeout(() => {
+          location.href = `login.html?redirect=${encodeURIComponent(href)}`;
+        }, 400);
+        return;
+      }
 
-    // Faqat login qilganlar uchun ruxsat
-    if (!requireAuth("Sevimlilarga qo'shish uchun avval hisobingizga kiring!")) {
-      return;
-    }
+      // 1. SEVIMLILAR (WISHLIST) TUGMASI BOSILGANDA
+      const wlBtn = e.target.closest('.product-card__wishlist, .quick-view__wishlist-btn');
+      if (wlBtn) {
+        e.preventDefault();
+        e.stopPropagation();
 
-    const id = +wlBtn.dataset.id;
-    const res = Store.toggleWishlist(id);
-    document.querySelectorAll(`.product-card__wishlist[data-id="${id}"], .quick-view__wishlist-btn[data-id="${id}"]`).forEach(btn => {
-      btn.classList.toggle('active', res.added);
-      btn.innerHTML = res.added ? ICONS.heartFilled : ICONS.heart;
-      btn.style.transform = 'scale(1.25)';
-      setTimeout(() => btn.style.transform = '', 300);
-    });
-    UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
-    if (document.body.dataset.page === 'wishlist' && !res.added) WishlistPage.init();
-    return;
-  }
+        if (!requireAuth("Sevimlilarga qo'shish uchun avval hisobingizga kiring!")) return;
 
-  // 2. SAVATGA QO'SHISH TUGMASI BOSILGANDA
-  const cartBtn = e.target.closest('.add-to-cart-btn');
-  if (cartBtn) {
-    e.preventDefault();
-    e.stopPropagation();
+        const id = +wlBtn.dataset.id;
+        const res = Store.toggleWishlist(id);
+        document.querySelectorAll(`.product-card__wishlist[data-id="${id}"], .quick-view__wishlist-btn[data-id="${id}"]`).forEach(btn => {
+          btn.classList.toggle('active', res.added);
+          btn.innerHTML = res.added ? ICONS.heartFilled : ICONS.heart;
+          btn.style.transform = 'scale(1.25)';
+          setTimeout(() => btn.style.transform = '', 300);
+        });
+        UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
+        if (document.body.dataset.page === 'wishlist' && !res.added) WishlistPage.init();
+        if (document.body.dataset.page === 'profile') ProfilePage.renderWishlist();
+        return;
+      }
 
-    // Faqat login qilganlar uchun ruxsat
-    if (!requireAuth("Kitobni savatga qo'shish uchun avval hisobingizga kiring!")) {
-      return;
-    }
+      // 2. SAVATGA QO'SHISH TUGMASI BOSILGANDA
+      const cartBtn = e.target.closest('.add-to-cart-btn');
+      if (cartBtn) {
+        e.preventDefault();
+        e.stopPropagation();
 
-    if (cartBtn.disabled) return;
-    const id = +cartBtn.dataset.id;
-    const product = PRODUCTS.find(pr => pr.id === id);
-    if (product && !product.inStock) { UI.showToast('Mahsulot tugagan', 'error'); return; }
-    Store.addToCart(id);
-    UI.showToast("Savatga qo'shildi!");
-    Animations.flyToCart(cartBtn);
-    return;
-  }
+        if (!requireAuth("Kitobni savatga qo'shish uchun avval hisobingizga kiring!")) return;
+
+        if (cartBtn.disabled) return;
+        const id = +cartBtn.dataset.id;
+        const product = PRODUCTS.find(pr => pr.id === id);
+        if (product && !product.inStock) { UI.showToast('Mahsulot tugagan', 'error'); return; }
+        Store.addToCart(id);
+        UI.showToast("Savatga qo'shildi!");
+        Animations.flyToCart(cartBtn);
+        return;
+      }
 
   // Tez ko'rish va Card navigatsiyasi o'zgarishsiz qoladi
   const qvBtn = e.target.closest('.quick-view-btn');
@@ -2358,7 +2424,7 @@ const ProductDetail = {
     document.getElementById('qtyPlus')?.addEventListener('click', () => { let v = +qtyInput.value; if (v < 10) qtyInput.value = v + 1; });
     // Add to cart
     document.getElementById('addToCartDetail')?.addEventListener('click', () => {
-      if (!requireAuth("Savatga qo'shish uchun tizimga kiring!")) return;
+      if (!requireAuth("Kitobni savatga qo'shish uchun avval hisobingizga kiring!")) return;
       const qty = parseInt(qtyInput?.value) || 1;
       const variant = infoEl.querySelector('.variant-option.selected')?.dataset.variant || null;
       Store.addToCart(p.id, qty, variant);
@@ -2373,7 +2439,7 @@ const ProductDetail = {
       location.href = 'checkout.html';
     });
     document.getElementById('wishDetail')?.addEventListener('click', () => {
-      if (!requireAuth("Sevimlilarga qo'shish uchun tizimga kiring!")) return;
+      if (!requireAuth("Sevimlilarga qo'shish uchun avval hisobingizga kiring!")) return;
       const res = Store.toggleWishlist(p.id);
       UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
       const btn = document.getElementById('wishDetail');
@@ -2406,7 +2472,7 @@ const ProductDetail = {
     </div>`;
     document.body.appendChild(bar);
     document.getElementById('stickyAdd')?.addEventListener('click', () => {
-      if (!requireAuth("Savatga qo'shish uchun tizimga kiring!")) return;
+      if (!requireAuth("Kitobni savatga qo'shish uchun avval hisobingizga kiring!")) return;
       const qty = parseInt(document.getElementById('qtyInput')?.value) || 1;
       Store.addToCart(p.id, qty);
       UI.showToast("Savatga qo'shildi!");
@@ -2479,10 +2545,10 @@ const ProductDetail = {
       const cards = all.map(r => `
         <div class="review-card" style="padding:20px 0;border-bottom:1px solid var(--gray-100)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <strong>${r.userName}</strong><span style="color:var(--gray-400);font-size:13px">${UI.formatDate(r.date)}</span>
+            <strong>${UI.escapeHtml(r.userName)}</strong><span style="color:var(--gray-400);font-size:13px">${UI.formatDate(r.date)}</span>
           </div>
           <div style="color:var(--accent);margin-bottom:8px;display:flex;">${renderStars(r.rating)}</div>
-          <p style="color:var(--gray-600);line-height:1.7">${r.text}</p>
+          <p style="color:var(--gray-600);line-height:1.7">${UI.escapeHtml(r.text)}</p>
           <button type="button" class="review-helpful" data-count="${r.helpful || 0}">${ICONS.thumbsUp} <span>${r.helpful || 0}</span> foydali</button>
         </div>`).join('');
       const avg = all.length ? (all.reduce((s, r) => s + r.rating, 0) / all.length).toFixed(1) : '—';
@@ -2543,9 +2609,9 @@ const ProductDetail = {
         </form>
         ${all.length ? all.map(q => `
           <div class="qna-item">
-            <p><strong>${q.userName}</strong> <span>${UI.formatDate(q.date)}</span></p>
-            <p class="qna-q">${q.text}</p>
-            ${q.answer ? `<p class="qna-a">${ICONS.check} ${q.answer}</p>` : '<p class="qna-a muted">Javob kutilmoqda</p>'}
+            <p><strong>${UI.escapeHtml(q.userName)}</strong> <span>${UI.formatDate(q.date)}</span></p>
+            <p class="qna-q">${UI.escapeHtml(q.text)}</p>
+            ${q.answer ? `<p class="qna-a">${ICONS.check} ${UI.escapeHtml(q.answer)}</p>` : '<p class="qna-a muted">Javob kutilmoqda</p>'}
           </div>`).join('') : '<p class="empty-hint">Hozircha savollar yo‘q.</p>'}`;
       document.getElementById('qnaForm')?.addEventListener('submit', e => {
         e.preventDefault();
@@ -2574,7 +2640,11 @@ const CartPage = {
   promoApplied: null,
   _bound: false,
   init() {
-    if (!requireAuth("Savatni ko'rish uchun avval hisobingizga kiring!")) return;
+    if (!requireAuth("Savatni ko'rish uchun avval hisobingizga kiring!")) {
+      const el = document.querySelector('.cart-page, main, .container');
+      if (el) el.style.display = 'none';
+      return;
+    }
     this.promoApplied = Store.getPromo();
     this.bindEvents();
     this.render();
@@ -2730,17 +2800,12 @@ const Checkout = {
   _bound: false,
 
   init() {
-    if (!Store.getCart().length) { location.href = 'cart.html'; return; }
-    if (!Store.getUser()) {
-      const layout = document.querySelector('.checkout__layout');
-      if (layout && !document.getElementById('guestNote')) {
-        const n = document.createElement('p');
-        n.id = 'guestNote';
-        n.className = 'guest-note';
-        n.innerHTML = `Mehmon sifatida davom etyapsiz. <a href="login.html">Kirish</a> buyurtmalaringizni profilga bog‘laydi.`;
-        layout.before(n);
-      }
+    if (!requireAuth("Buyurtma berish uchun avval hisobingizga kiring!")) {
+      const el = document.querySelector('.checkout__layout, main, .container');
+      if (el) el.style.display = 'none';
+      return;
     }
+    if (!Store.getCart().length) { location.href = 'cart.html'; return; }
     this.bindLists();
     this.renderAddresses();
     this.renderDelivery();
@@ -3064,7 +3129,9 @@ const Auth = {
       setTimeout(() => {
         Store.login(email.value, pass.value);
         UI.showToast("Xush kelibsiz!");
-        this.showSuccess(() => { location.href = 'book_list.html'; });
+        const params = new URLSearchParams(location.search);
+        const redirectUrl = params.get('redirect') || 'book_list.html';
+        this.showSuccess(() => { location.href = redirectUrl; });
       }, 700);
     });
 
@@ -3130,7 +3197,9 @@ const Auth = {
         const phoneVal = phoneEl ? phoneEl.value : '';
         Store.register(nameEl.value, emailEl.value, phoneVal, passEl.value);
         UI.showToast("Hisob muvaffaqiyatli ochildi!");
-        this.showSuccess(() => { location.href = 'book_list.html'; });
+        const params = new URLSearchParams(location.search);
+        const redirectUrl = params.get('redirect') || 'book_list.html';
+        this.showSuccess(() => { location.href = redirectUrl; });
       }, 700);
     });
 
@@ -3368,7 +3437,11 @@ const ProfilePage = {
     });
   },
   init() {
-    if (!requireAuth("Profilingizni ko'rish uchun avval hisobingizga kiring!")) return;
+    if (!requireAuth("Profilingizni ko'rish uchun avval hisobingizga kiring!")) {
+      const el = document.querySelector('.profile-layout, main, .container');
+      if (el) el.style.display = 'none';
+      return;
+    }
     const user = Store.getUser();
     document.getElementById('profileName').textContent = user.name;
     document.getElementById('profileEmail').textContent = user.email;
@@ -3597,7 +3670,11 @@ const ProfilePage = {
    ======================================================================== */
 const OrdersPage = {
   init() {
-    if (!requireAuth("Buyurtmalaringizni ko'rish uchun avval hisobingizga kiring!")) return;
+    if (!requireAuth("Buyurtmalaringizni ko'rish uchun avval hisobingizga kiring!")) {
+      const el = document.querySelector('.orders-page, main, .container');
+      if (el) el.style.display = 'none';
+      return;
+    }
     const orders = Store.getOrders();
     const listEl = document.getElementById('ordersList');
     const emptyEl = document.getElementById('emptyOrders');
@@ -3654,7 +3731,7 @@ const OrdersPage = {
           Store.cancelOrder(btn.dataset.id);
           UI.showToast('Buyurtma bekor qilindi');
           this.init();
-        });
+        }, "Ha, bekor qilish");
       });
     });
   }
@@ -3665,7 +3742,11 @@ const OrdersPage = {
    ======================================================================== */
 const WishlistPage = {
   init() {
-    if (!requireAuth("Sevimlilar ro'yxatini ko'rish uchun avval hisobingizga kiring!")) return;
+    if (!requireAuth("Sevimlilar ro'yxatini ko'rish uchun avval hisobingizga kiring!")) {
+      const el = document.querySelector('.wishlist-page, main, .container');
+      if (el) el.style.display = 'none';
+      return;
+    }
     const wl = Store.getWishlist();
     const gridEl = document.getElementById('wishlistGrid');
     const emptyEl = document.getElementById('emptyWishlist');
@@ -3898,6 +3979,7 @@ function initHeader() {
   if (cartToggle && miniCart) {
     cartToggle.addEventListener('click', e => {
       e.stopPropagation();
+      if (!requireAuth("Savatni ko'rish uchun avval hisobingizga kiring!")) return;
       miniCart.classList.toggle('active');
       cartToggle.setAttribute('aria-expanded', String(miniCart.classList.contains('active')));
       document.getElementById('userDropdown')?.classList.remove('active');
@@ -4638,95 +4720,97 @@ function enableDragScroll(el) {
   let isDown = false;
   let startX = 0;
   let scrollStart = 0;
-  let isDragging = false; // Faqat haqiqiy surish boshlangandagina true bo'ladi
+  let hasMoved = false;
   let velocity = 0;
   let lastX = 0;
   let lastTime = 0;
   let momentumID = null;
 
-  // Inersiyali silliq to'xtash (Momentum physics)
+  const cancelMomentum = () => {
+    if (momentumID) {
+      cancelAnimationFrame(momentumID);
+      momentumID = null;
+    }
+  };
+
   const beginMomentum = () => {
-    cancelAnimationFrame(momentumID);
+    cancelMomentum();
     const step = () => {
-      if (Math.abs(velocity) > 0.5) {
+      if (Math.abs(velocity) > 0.4) {
         el.scrollLeft += velocity;
-        velocity *= 0.92; // Sekinlashish koeffitsiyenti
+        velocity *= 0.92;
         momentumID = requestAnimationFrame(step);
       }
     };
     momentumID = requestAnimationFrame(step);
   };
 
-  el.addEventListener('mousedown', (e) => {
-    // Interaktiv tugmalar (savat, yurakcha, tez ko'rish) bosilganda drag ishlamasin
+  el.addEventListener('pointerdown', (e) => {
     if (e.target.closest('button, input, select, textarea, .product-card__wishlist, .add-to-cart-btn, .quick-view-btn')) return;
-    if (e.button !== 0) return; // Faqat chap tugma
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
 
-    cancelAnimationFrame(momentumID);
+    cancelMomentum();
     isDown = true;
-    isDragging = false;
-    startX = e.pageX;
+    hasMoved = false;
+    startX = e.clientX;
     scrollStart = el.scrollLeft;
-    lastX = e.pageX;
+    lastX = e.clientX;
     lastTime = performance.now();
     velocity = 0;
+    try { el.setPointerCapture(e.pointerId); } catch {}
   });
 
-  window.addEventListener('mousemove', (e) => {
+  el.addEventListener('pointermove', (e) => {
     if (!isDown) return;
+    const deltaX = e.clientX - startX;
 
-    const deltaX = e.pageX - startX;
-
-    // THRESHOLD: Agar 8 pikseldan ko'p surilsa, bu haqiqiy drag hisoblanadi
-    if (!isDragging && Math.abs(deltaX) > 8) {
-      isDragging = true;
+    if (!hasMoved && Math.abs(deltaX) > 6) {
+      hasMoved = true;
       el.classList.add('is-dragging');
     }
 
-    if (isDragging) {
+    if (hasMoved) {
       e.preventDefault();
       el.scrollLeft = scrollStart - deltaX;
-
       const now = performance.now();
       const dt = now - lastTime || 16;
-      const dx = e.pageX - lastX;
-      velocity = -(dx / dt) * 12;
-      lastX = e.pageX;
+      const dx = e.clientX - lastX;
+      velocity = -(dx / dt) * 14;
+      lastX = e.clientX;
       lastTime = now;
     }
   });
 
-  const stopDrag = () => {
+  const onPointerUp = (e) => {
     if (!isDown) return;
     isDown = false;
+    try { el.releasePointerCapture(e.pointerId); } catch {}
     el.classList.remove('is-dragging');
 
-    if (isDragging) {
+    if (hasMoved) {
       beginMomentum();
-      // Faqat drag qilingan bo'lsagina bir zum click'ni ushlab turadi
-      setTimeout(() => { isDragging = false; }, 50);
+      setTimeout(() => { hasMoved = false; }, 80);
     }
   };
 
-  window.addEventListener('mouseup', stopDrag);
+  el.addEventListener('pointerup', onPointerUp);
+  el.addEventListener('pointercancel', onPointerUp);
 
-  // Kartochka ustiga bosilganda click hodisasini boshqarish
+  // Prevent link navigation if the user dragged/swiped horizontally
   el.addEventListener('click', (e) => {
-    if (isDragging) {
+    if (hasMoved) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-
-    // 1 ta click bo'lsa — to'g'ridan-to'g'ri kitob sahifasiga o'tadi
     const card = e.target.closest('.product-card, .category-card');
     if (card && !e.target.closest('button, .product-card__wishlist, .add-to-cart-btn, .quick-view-btn')) {
       const href = card.dataset.href || card.getAttribute('href');
-      if (href) {
+      if (href && card.tagName !== 'A') {
         window.location.href = href;
       }
     }
-  });
+  }, true);
 }
 
 
@@ -4900,6 +4984,8 @@ function initInfoPage() {
     const page = INFO_PAGES[key];
     document.title = 'Booksaw — ' + page.title;
     el.innerHTML = '<h1>' + page.title + '</h1>' + page.body;
+    const breadcrumbEl = document.querySelector('.breadcrumbs__current, [data-info-breadcrumb]');
+    if (breadcrumbEl) breadcrumbEl.textContent = page.title;
   }
   document.querySelectorAll('.info-nav a').forEach(a => {
     a.classList.toggle('is-active', a.getAttribute('href') === 'info.html?page=' + key || (key === 'blog' && a.getAttribute('href') === 'info.html?page=blog'));

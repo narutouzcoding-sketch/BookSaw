@@ -5616,30 +5616,32 @@ main, .home-content, #catalogView {
 
 @media (max-width: 768px) {
   .header__inner {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 8px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
     overflow: visible;
   }
   .header .header__search { display: none !important; }
-  .header__logo { max-width: 140px; min-width: 0; grid-column: 1; }
-  .header__logo img { height: 22px; max-width: 140px; width: auto; object-fit: contain; object-position: left center; }
+  .header__logo { max-width: 130px; min-width: 0; flex-shrink: 0; }
+  .header__logo img { height: 24px; max-width: 120px; width: auto; object-fit: contain; object-position: left center; }
   .section-header { align-items: baseline; }
   .section-title { font-size: 20px; }
   .section-link { font-size: 12px; white-space: nowrap; flex-shrink: 0; }
-  .header__actions { gap: 6px; margin-left: 0; grid-column: 2; display: flex !important; align-items: center; justify-self: end; z-index: 2; }
+  .header__actions { gap: 8px; margin-left: 0; display: flex !important; align-items: center; justify-content: flex-end; flex-shrink: 0; z-index: 2; }
   .header__action-btn { width: 40px; height: 40px; }
-  /* Only the categories dropdown collapses on mobile — it's duplicated as a link
-     inside the hamburger menu. The theme switch has no equivalent there, so it
-     must stay visible and reachable on every screen size. */
-  .header__actions .header__action-item:nth-child(1) { display: none; }
+  /* On mobile, Wishlist, Cart, and Profile are provided directly in the bottom navigation bar.
+     Hiding them in the top header keeps the header uncluttered and prevents any collision with the logo. */
+  .header__actions .header__action-item:nth-child(1),
+  .header__actions .header__action-item:nth-child(3),
+  .header__actions .header__action-item:nth-child(4),
+  .header__actions .header__action-item:nth-child(5) { display: none !important; }
   .header__action-item { display: flex; align-items: center; }
   .header__hamburger,
   .header__hamburger.mobile-only {
     display: flex !important;
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     flex-shrink: 0;
     background: var(--gray-100);
     border-radius: var(--radius-full);
@@ -8558,21 +8560,31 @@ body.dark-mode .switch-chassis.compact .thumb-slider {
 .switch-chassis.compact .thumb-icons-wrapper {
   width: 15px;
   height: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: auto !important;
 }
 
 .switch-chassis.compact .thumb-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .switch-chassis.compact .thumb-icon svg {
-  width: 15px;
-  height: 15px;
-  display: block;
+  width: 15px !important;
+  height: 15px !important;
+  display: block !important;
+  margin: auto !important;
+  filter: none !important;
 }
 
 /* Mobile compact switch — placed after the unconditional rule above on
@@ -8585,8 +8597,8 @@ body.dark-mode .switch-chassis.compact .thumb-slider {
   [data-theme="dark"] .switch-chassis.compact .thumb-slider,
   body.dark-mode .switch-chassis.compact .thumb-slider { left: calc(100% - 22px - 4px); }
   .switch-chassis.compact .track-icon { width: 13px; height: 13px; }
-  .switch-chassis.compact .thumb-icons-wrapper { width: 13px; height: 13px; }
-  .switch-chassis.compact .thumb-icon svg { width: 13px; height: 13px; }
+  .switch-chassis.compact .thumb-icons-wrapper { width: 13px; height: 13px; margin: auto !important; }
+  .switch-chassis.compact .thumb-icon svg { width: 13px; height: 13px; margin: auto !important; filter: none !important; }
 }
 
 /* ==========================================================================

@@ -19,13 +19,13 @@
           <svg viewBox="0 0 32 32">
             <circle cx="16" cy="16" r="6"/>
             <rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/>
-            <rect x="14.5" y="25.5" width="3" height="4.5" rx="1.5"/>
-            <rect x="2" y="14.5" width="4.5" height="3" rx="1.5"/>
-            <rect x="25.5" y="14.5" width="4.5" height="3" rx="1.5"/>
-            <rect x="5.5" y="6" width="4.5" height="3" rx="1.5" transform="rotate(45 7.75 7.5)"/>
-            <rect x="22" y="22.5" width="4.5" height="3" rx="1.5" transform="rotate(45 24.25 24)"/>
-            <rect x="22.5" y="6.5" width="3" height="4.5" rx="1.5" transform="rotate(45 24 8.75)"/>
-            <rect x="6" y="23" width="3" height="4.5" rx="1.5" transform="rotate(45 7.5 25.25)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(45 16 16)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(90 16 16)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(135 16 16)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(180 16 16)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(225 16 16)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(270 16 16)"/>
+            <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(315 16 16)"/>
           </svg>
         </div>
         <div class="track-icon">
@@ -42,13 +42,13 @@
               <svg viewBox="0 0 32 32">
                 <circle cx="16" cy="16" r="6"/>
                 <rect x="14.5" y="2" width="3" height="4.5" rx="1.5"/>
-                <rect x="14.5" y="25.5" width="3" height="4.5" rx="1.5"/>
-                <rect x="2" y="14.5" width="4.5" height="3" rx="1.5"/>
-                <rect x="25.5" y="14.5" width="4.5" height="3" rx="1.5"/>
-                <rect x="5.5" y="6" width="4.5" height="3" rx="1.5" transform="rotate(45 7.75 7.5)"/>
-                <rect x="22" y="22.5" width="4.5" height="3" rx="1.5" transform="rotate(45 24.25 24)"/>
-                <rect x="22.5" y="6.5" width="3" height="4.5" rx="1.5" transform="rotate(45 24 8.75)"/>
-                <rect x="6" y="23" width="3" height="4.5" rx="1.5" transform="rotate(45 7.5 25.25)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(45 16 16)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(90 16 16)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(135 16 16)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(180 16 16)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(225 16 16)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(270 16 16)"/>
+                <rect x="14.5" y="2" width="3" height="4.5" rx="1.5" transform="rotate(315 16 16)"/>
               </svg>
             </div>
             <div class="thumb-icon icon-moon">

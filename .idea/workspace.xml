@@ -6,6 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="cd0bd4d3-2212-4490-a28c-86dcb27eda54" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catalog/static/catalog/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/catalog/static/catalog/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catalog/static/catalog/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/catalog/static/catalog/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catalog/static/catalog/js/shared-header.js" beforeDir="false" afterPath="$PROJECT_DIR$/catalog/static/catalog/js/shared-header.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catalog/templates/catalog/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/catalog/templates/catalog/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catalog/templates/catalog/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/catalog/templates/catalog/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

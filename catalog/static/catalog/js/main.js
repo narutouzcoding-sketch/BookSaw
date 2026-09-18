@@ -58,9 +58,10 @@ const Theme = {
   get() {
     try {
       const t = localStorage.getItem(this.key) || localStorage.getItem('bookscatalog-theme');
-      if (t === 'light' || t === 'dark') return t;
+      if (t === 'dark') return 'dark';
+      if (t === 'light') return 'light';
     } catch { /* ignore */ }
-    return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'light';
   },
   apply(theme) {
     document.documentElement.setAttribute('data-theme', theme);
@@ -168,12 +169,6 @@ const Theme = {
     document.addEventListener('booksaw:themechange', (e) => {
       if (e.detail && !this._applying) this.syncControls(e.detail);
     });
-    if (window.matchMedia) {
-      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        try { if (localStorage.getItem(this.key)) return; } catch { return; }
-        this.apply(e.matches ? 'dark' : 'light');
-      });
-    }
   }
 };
 

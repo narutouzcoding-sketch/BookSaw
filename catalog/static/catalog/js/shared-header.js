@@ -8,6 +8,7 @@
     cart: icon('<circle cx="9" cy="20" r="1"/><circle cx="20" cy="20" r="1"/><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.5L22 7H6"/>'),
     user: icon('<circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>', 'user-toggle__svg'),
     menu: icon('<path d="M4 6h16M4 12h16M4 18h16"/>'),
+    close: icon('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
     sun: icon('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>', 'icon-sun'),
     moon: icon('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>', 'icon-moon')
   };
@@ -136,7 +137,7 @@
 <nav class="mobile-menu" id="mobileMenu" aria-label="Mobil menyu">
   <div class="mobile-menu__header">
     <img src="../../static/catalog/images/main-logo.png" alt="Booksaw">
-    <button type="button" id="closeMobileMenu" aria-label="Yopish">×</button>
+    <button type="button" id="closeMobileMenu" aria-label="Yopish">${I.close}</button>
   </div>
   <div class="mobile-menu__search">
     <input type="search" placeholder="Qidirish...">

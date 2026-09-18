@@ -202,10 +202,7 @@ function runBinEatAnimation(button, onComplete) {
 
   const chars = Array.from(label.querySelectorAll('.char'));
   const binWrapper = button.querySelector('.bin-wrapper');
-  const ringIndicator = button.querySelector('.indicator');
 
-  // Capture every starting point before the pill contracts. This keeps the
-  // trajectory locked to the real glyph position instead of a reflowed one.
   const binRect = binWrapper ? binWrapper.getBoundingClientRect() : { left: 0, top: 0, width: 20 };
   const mouthX = binRect.left + binRect.width / 2;
   const mouthY = binRect.top + 4;
@@ -218,22 +215,21 @@ function runBinEatAnimation(button, onComplete) {
     };
   });
 
-  // Stage 1: Open bin lid and shrink button pill to circle
+  // Stage 1: Open bin lid and start animation
   button.classList.add('lid-open');
   button.classList.add('is-eating');
 
   // Stage 2: Parabolic letter ingestion with staggered delay
   flightPlan.forEach(({ char, deltaX, deltaY }, index) => {
-    const delay = index * 80;
+    const delay = index * 45;
 
     if (char.animate) {
       char.animate([
         { transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
-        { transform: `translate(${deltaX * 0.45}px, ${deltaY - 32}px) scale(0.9) rotate(-35deg)`, opacity: 0.9, offset: 0.5 },
-        { transform: `translate(${deltaX * 0.85}px, ${deltaY - 10}px) scale(0.5) rotate(-65deg)`, opacity: 0.7, offset: 0.8 },
-        { transform: `translate(${deltaX}px, ${deltaY + 12}px) scale(0) rotate(-95deg)`, opacity: 0 }
+        { transform: `translate(${deltaX * 0.5}px, ${deltaY - 18}px) scale(0.85) rotate(-25deg)`, opacity: 0.9, offset: 0.5 },
+        { transform: `translate(${deltaX}px, ${deltaY + 8}px) scale(0.1) rotate(-75deg)`, opacity: 0 }
       ], {
-        duration: 480,
+        duration: 320,
         delay: delay,
         easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         fill: 'forwards'
@@ -243,71 +239,39 @@ function runBinEatAnimation(button, onComplete) {
     }
   });
 
-  const totalEatTime = (chars.length * 80) + 480;
+  const totalEatTime = (chars.length * 45) + 320;
 
-  // Stage 3: Close lid & trigger recoil bounce
+  // Stage 3: Close lid & trigger recoil bounce (No circular ring)
   setTimeout(() => {
     button.classList.remove('lid-open');
 
     if (binWrapper && binWrapper.animate) {
       binWrapper.animate([
         { transform: 'scale(1) translateY(0)' },
-        { transform: 'scale(1.18, 0.85) translateY(2px)' },
+        { transform: 'scale(1.15, 0.88) translateY(2px)' },
         { transform: 'scale(0.95, 1.05) translateY(-2px)' },
         { transform: 'scale(1) translateY(0)' }
-      ], { duration: 320, easing: 'ease-out' });
+      ], { duration: 250, easing: 'ease-out' });
     }
 
-    // Stage 4: Spinner ring progress indicator
-    button.classList.add('spinning');
-    if (ringIndicator && ringIndicator.animate) {
-      ringIndicator.animate([
-        { strokeDashoffset: 200 },
-        { strokeDashoffset: 0 }
-      ], {
-        duration: 1100,
-        easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        fill: 'forwards'
-      });
-    }
-
-    // Stage 5: Execute action callback and spring back to normal state
+    // Stage 4: Execute callback promptly without awkward spinner ring delay
     setTimeout(() => {
-      button.classList.remove('spinning');
       button.classList.remove('is-eating');
 
       chars.forEach(char => {
         if (char.getAnimations) {
           char.getAnimations().forEach(anim => anim.cancel());
         }
-        char.style.opacity = '0';
+        char.style.opacity = '1';
+        char.style.transform = 'none';
       });
 
       if (typeof onComplete === 'function') {
         try { onComplete(); } catch (err) { console.error('onComplete error:', err); }
       }
+    }, 280);
 
-      // Smooth reappearance of letters
-      setTimeout(() => {
-        chars.forEach((char, i) => {
-          if (char.animate) {
-            char.animate([
-              { opacity: 0, transform: 'translateY(4px)' },
-              { opacity: 1, transform: 'translateY(0)' }
-            ], {
-              duration: 250,
-              delay: i * 35,
-              fill: 'forwards'
-            });
-          } else {
-            char.style.opacity = '1';
-          }
-        });
-      }, 300);
-
-    }, 1200);
-
-  }, Math.max(300, totalEatTime - 100));
+  }, Math.max(200, totalEatTime - 40));
 }
 
 function createBinButtonHtml(text, colorClass = 'danger', id = '') {
@@ -327,10 +291,6 @@ function createBinButtonHtml(text, colorClass = 'danger', id = '') {
       </svg>
     </div>
     <span class="btn-label">${chars}</span>
-    <svg class="progress-ring" viewBox="0 0 68 68">
-      <circle class="track" cx="34" cy="34" r="31"></circle>
-      <circle class="indicator" cx="34" cy="34" r="31"></circle>
-    </svg>
   </button>`;
 }
 
@@ -481,6 +441,16 @@ const Store = {
   _saveWishlist(wl) {
     this._scopedSet('marketplace_wishlist', wl);
     UI.updateBadges();
+  },
+  clearWishlist() {
+    this._saveWishlist([]);
+  },
+  removeFromWishlist(productId) {
+    let wl = this.getWishlist();
+    if (wl.includes(productId)) {
+      wl = wl.filter(id => id !== productId);
+      this._saveWishlist(wl);
+    }
   },
   toggleWishlist(productId) {
     let wl = this.getWishlist();
@@ -986,7 +956,7 @@ const UI = {
     else modal.className = 'modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
-    modal.innerHTML = `<button class="modal__close" id="modalCloseBtn" type="button" aria-label="Yopish">&times;</button>${html}`;
+    modal.innerHTML = `<button class="modal__close" id="modalCloseBtn" type="button" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>${html}`;
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     const close = () => { overlay.classList.remove('active'); document.body.style.overflow = ''; };
@@ -2548,7 +2518,23 @@ const CartPage = {
       }
       const removeBtn = e.target.closest('.cart-remove');
       if (removeBtn) {
-        UI.showConfirm("Bu mahsulotni savatdan o'chirasizmi?", () => { Store.removeFromCart(+removeBtn.dataset.id); this.render(); UI.showToast("Savatdan o'chirildi"); });
+        UI.showConfirm("Bu mahsulotni savatdan o'chirasizmi?", () => {
+          const itemEl = removeBtn.closest('.cart-item');
+          if (itemEl) {
+            itemEl.style.transition = 'all 0.28s cubic-bezier(0.4, 0, 0.2, 1)';
+            itemEl.style.opacity = '0';
+            itemEl.style.transform = 'translateX(24px)';
+            setTimeout(() => {
+              Store.removeFromCart(+removeBtn.dataset.id);
+              this.render();
+              UI.showToast("Savatdan o'chirildi");
+            }, 260);
+          } else {
+            Store.removeFromCart(+removeBtn.dataset.id);
+            this.render();
+            UI.showToast("Savatdan o'chirildi");
+          }
+        });
         return;
       }
       const moveBtn = e.target.closest('.cart-move-wl');
@@ -3753,7 +3739,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
     if (page === 'home' && catalogQuery) {
+      document.body.dataset.page = 'catalog';
       initCatalogPage();
+      initBottomNav();
     } else {
       switch (page) {
         case 'home': initHomePage(); break;
@@ -3800,11 +3788,10 @@ function initHeader() {
     }
   });
   // Sticky shadow
-  if (header) {
-    window.addEventListener('scroll', () => {
-      header.classList.toggle('scrolled', window.scrollY > 10);
-    });
-  }
+  window.addEventListener('scroll', () => {
+    const h = document.getElementById('header');
+    if (h) h.classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive: true });
   // Search autocomplete + submit
   const searchInput = document.getElementById('searchInput');
   Search.initAutocomplete(searchInput, document.getElementById('searchSuggestions'));
@@ -3986,6 +3973,17 @@ const BRAND_PARTNERS = [
 ];
 
 function initHomePage() {
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  const wrap = document.getElementById('catalogView');
+  if (wrap) wrap.style.display = 'none';
+  const main = document.getElementById('mainContent') || document.querySelector('main');
+  if (main) {
+    Array.from(main.children).forEach(el => {
+      if (el.id !== 'catalogView') el.style.display = '';
+    });
+  }
   Slider.init();
   // Categories row
   const catRow = document.getElementById('categoriesRow');
@@ -4043,7 +4041,14 @@ function initCatalogPage() {
   const gift = params.get('gift') === 'true';
   const sort = params.get('sort') || 'popular';
 
-  document.querySelectorAll('.hero, .home-section, .home-content > section, body[data-page="home"] > section').forEach(el => {
+  const main = document.getElementById('mainContent') || document.querySelector('main');
+  if (main) {
+    Array.from(main.children).forEach(el => {
+      if (el.id !== 'catalogView') el.style.display = 'none';
+    });
+  }
+
+  document.querySelectorAll('.hero, .home-hero-wrap, .home-section, .home-content > section, body[data-page="home"] > section, .trust-strip, #trustStrip').forEach(el => {
     el.style.display = 'none';
   });
 
@@ -4052,9 +4057,15 @@ function initCatalogPage() {
     wrap = document.createElement('div');
     wrap.id = 'catalogView';
     wrap.className = 'container';
-    const footer = document.querySelector('.footer');
-    if (footer) footer.parentNode.insertBefore(wrap, footer);
-    else document.body.appendChild(wrap);
+    if (main) {
+      main.prepend(wrap);
+    } else {
+      const footer = document.querySelector('.footer');
+      if (footer) footer.parentNode.insertBefore(wrap, footer);
+      else document.body.appendChild(wrap);
+    }
+  } else if (main && wrap.parentNode !== main) {
+    main.prepend(wrap);
   }
   wrap.style.display = '';
 
@@ -4066,7 +4077,7 @@ function initCatalogPage() {
   const title = q ? `Qidiruv: “${q}”` : sale ? 'Chegirmadagi kitoblar' : gift ? 'Sovg‘a to‘plamlari' : cat ? cat.name : 'Barcha kitoblar';
 
   wrap.innerHTML = `
-    <nav class="breadcrumb">
+    <nav class="breadcrumb" style="margin-bottom:20px; padding:0;">
       <a href="book_list.html">Bosh sahifa</a> <span>/</span>
       ${cat ? `<a href="categories.html">Kategoriyalar</a> <span>/</span> <span>${cat.name}</span>` : `<span>${title}</span>`}
     </nav>
@@ -4299,9 +4310,11 @@ function initBottomNav() {
     wishlist: ICONS.heart,
     profile: ICONS.user
   };
+  const params = new URLSearchParams(location.search);
   document.querySelectorAll('.bottom-nav__item').forEach(item => {
     const itemPage = item.dataset.page;
-    const isActive = itemPage === page || (page === 'detail' && itemPage === 'home');
+    const isCatActive = page === 'catalog' && (params.has('cat') ? itemPage === 'categories' : itemPage === 'home');
+    const isActive = itemPage === page || (page === 'detail' && itemPage === 'home') || isCatActive;
     item.classList.toggle('active', isActive);
     const iconEl = item.querySelector('.bottom-nav__icon, .icon');
     if (iconEl && iconMap[itemPage]) iconEl.innerHTML = iconMap[itemPage];
@@ -4558,7 +4571,12 @@ function attachCarouselArrows(el) {
   // side has nothing left to scroll to. No more dead arrows sitting next to
   // a row that already shows every card.
   const updateNavState = () => {
-    const hasOverflow = el.scrollWidth > el.clientWidth + 4;
+    if (window.getComputedStyle(el).display === 'grid') {
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+      return;
+    }
+    const hasOverflow = el.scrollWidth > el.clientWidth + 28;
     prevBtn.style.display = hasOverflow ? '' : 'none';
     nextBtn.style.display = hasOverflow ? '' : 'none';
     if (!hasOverflow) return;
@@ -4582,40 +4600,101 @@ function attachCarouselArrows(el) {
 function enableDragScroll(el) {
   if (!el || el.dataset.dragBound) return;
   el.dataset.dragBound = '1';
-  let down = false, startX = 0, startScroll = 0, moved = false;
-  el.addEventListener('dragstart', e => e.preventDefault());
-  el.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'touch') return;
-    if (e.button !== 0) return;
-    if (e.target.closest('button, input, select, textarea, label, a')) return;
-    down = true;
-    moved = false;
-    startX = e.clientX;
-    startScroll = el.scrollLeft;
-    el.classList.add('is-dragging');
-    try { el.setPointerCapture(e.pointerId); } catch { /* ignore */ }
-  });
-  el.addEventListener('pointermove', e => {
-    if (!down) return;
-    const dx = e.clientX - startX;
-    if (Math.abs(dx) > 12) moved = true;
-    el.scrollLeft = startScroll - dx;
-  });
-  const up = () => {
-    down = false;
-    el.classList.remove('is-dragging');
-    setTimeout(() => { moved = false; }, 80);
+
+  let isDown = false;
+  let startX = 0;
+  let scrollStart = 0;
+  let isDragging = false; // Faqat haqiqiy surish boshlangandagina true bo'ladi
+  let velocity = 0;
+  let lastX = 0;
+  let lastTime = 0;
+  let momentumID = null;
+
+  // Inersiyali silliq to'xtash (Momentum physics)
+  const beginMomentum = () => {
+    cancelAnimationFrame(momentumID);
+    const step = () => {
+      if (Math.abs(velocity) > 0.5) {
+        el.scrollLeft += velocity;
+        velocity *= 0.92; // Sekinlashish koeffitsiyenti
+        momentumID = requestAnimationFrame(step);
+      }
+    };
+    momentumID = requestAnimationFrame(step);
   };
-  el.addEventListener('pointerup', up);
-  el.addEventListener('pointercancel', up);
-  el.addEventListener('lostpointercapture', up);
-  el.addEventListener('click', e => {
-    if (moved) {
+
+  el.addEventListener('mousedown', (e) => {
+    // Interaktiv tugmalar (savat, yurakcha, tez ko'rish) bosilganda drag ishlamasin
+    if (e.target.closest('button, input, select, textarea, .product-card__wishlist, .add-to-cart-btn, .quick-view-btn')) return;
+    if (e.button !== 0) return; // Faqat chap tugma
+
+    cancelAnimationFrame(momentumID);
+    isDown = true;
+    isDragging = false;
+    startX = e.pageX;
+    scrollStart = el.scrollLeft;
+    lastX = e.pageX;
+    lastTime = performance.now();
+    velocity = 0;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+
+    const deltaX = e.pageX - startX;
+
+    // THRESHOLD: Agar 8 pikseldan ko'p surilsa, bu haqiqiy drag hisoblanadi
+    if (!isDragging && Math.abs(deltaX) > 8) {
+      isDragging = true;
+      el.classList.add('is-dragging');
+    }
+
+    if (isDragging) {
+      e.preventDefault();
+      el.scrollLeft = scrollStart - deltaX;
+
+      const now = performance.now();
+      const dt = now - lastTime || 16;
+      const dx = e.pageX - lastX;
+      velocity = -(dx / dt) * 12;
+      lastX = e.pageX;
+      lastTime = now;
+    }
+  });
+
+  const stopDrag = () => {
+    if (!isDown) return;
+    isDown = false;
+    el.classList.remove('is-dragging');
+
+    if (isDragging) {
+      beginMomentum();
+      // Faqat drag qilingan bo'lsagina bir zum click'ni ushlab turadi
+      setTimeout(() => { isDragging = false; }, 50);
+    }
+  };
+
+  window.addEventListener('mouseup', stopDrag);
+
+  // Kartochka ustiga bosilganda click hodisasini boshqarish
+  el.addEventListener('click', (e) => {
+    if (isDragging) {
       e.preventDefault();
       e.stopPropagation();
+      return;
     }
-  }, true);
+
+    // 1 ta click bo'lsa — to'g'ridan-to'g'ri kitob sahifasiga o'tadi
+    const card = e.target.closest('.product-card, .category-card');
+    if (card && !e.target.closest('button, .product-card__wishlist, .add-to-cart-btn, .quick-view-btn')) {
+      const href = card.dataset.href || card.getAttribute('href');
+      if (href) {
+        window.location.href = href;
+      }
+    }
+  });
 }
+
 
 function initPublishersMarquee() {
   const track = document.getElementById('brandsRow');

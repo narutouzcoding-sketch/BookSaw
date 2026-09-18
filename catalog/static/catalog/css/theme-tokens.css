@@ -1,7 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
 
 /* ==============================================================================
-   Booksaw Design Tokens — Obsidian & Emerald Bookshop Theme
+   Booksaw Design Tokens — SINGLE SOURCE OF TRUTH
+   Obsidian & Emerald Bookshop Theme (unified light + dark)
+
+   Every color used anywhere in style.css, login.html, register.html, and all
+   other pages must trace back to a variable defined here. Do not hardcode
+   hex colors anywhere else — add a token here instead.
    ============================================================================== */
 :root {
   color-scheme: light;
@@ -9,58 +14,159 @@
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-numeric: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
-  --bg-primary: #f8f6f0;
+
+  /* ---- Brand: deep emerald + warm gold ---- */
+  --primary: #1b5e45;
+  --primary-dark: #123f2f;
+  --primary-hover: #123f2f;
+  --primary-light: #e7f2ec;
+  --on-primary: #ffffff;
+
+  --secondary: #334155;
+  --secondary-dark: #1e293b;
+  --secondary-light: #f8fafc;
+
+  /* Accent = warm gold. Used for star ratings, wishlist hover, highlight
+     underlines, bestseller badges — anything that reads as "premium/starred". */
+  --accent: #d9a531;
+  --accent-hover: #b8891f;
+  --accent-light: #faf1da;
+  --accent-contrast: #1c2230;
+
+  /* Danger = true red. Used ONLY for errors, delete actions, discount ribbons.
+     Kept separate from --accent so ratings/badges never turn alarm-red. */
+  --danger: #dc2626;
+  --danger-light: #fee2e2;
+  --badge-discount: #dc2626;
+  --badge-bestseller: #d9a531;
+
+  --ink: #16261e;
+
+  /* Grays / Neutrals */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+
+  --white: #ffffff;
+  --black: #16261e;
+
+  /* Backgrounds / surfaces */
+  --bg: #f4f6fa;
+  --bg-primary: #f4f6fa;
   --bg-card: #ffffff;
   --bg-elevated: #ffffff;
-  --bg-hover: #f0f6f2;
-  --text-primary: #121f18;
-  --text-secondary: #4a5c52;
-  --text-muted: #73857b;
-  --border: #e2e9e4;
-  --border-color: #e2e9e4;
-  --border-hover: #c4d4c9;
-  --primary: #1b5e45;
-  --primary-dark: #124331;
-  --primary-light: #e4f3eb;
-  --secondary: #277a5a;
-  --accent: #d97706;
-  --accent-hover: #b45309;
-  --accent-contrast: #ffffff;
-  --badge-discount: #ef4444;
-  --badge-bestseller: #f59e0b;
-  --image-bg: #eceae3;
-  --header-bg: rgba(255, 255, 255, 0.94);
-  --footer-bg: #0d1e16;
-  --shadow-sm: 0 1px 3px rgba(18, 31, 24, 0.05);
-  --shadow-md: 0 6px 16px -4px rgba(18, 31, 24, 0.08);
-  --shadow-lg: 0 12px 28px -6px rgba(18, 31, 24, 0.12);
+  --bg-hover: #eef1f6;
+  --header-bg: rgba(255, 255, 255, 0.97);
+  --footer-bg: #142219;
+  --image-bg: #f4f6fa;
+  --text-primary: #1c2230;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border: #e3e7ee;
+  --border-color: #e3e7ee;
+
+  /* Shadows — neutral, theme stays black-based on purpose */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 6px 16px -4px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 14px 32px -6px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 20px 40px -8px rgba(15, 23, 42, 0.16);
+
+  /* ---- Neumorphic auth-page aliases: same brand, just mapped ---- */
+  --neu-bg: var(--bg-primary);
+  --neu-card-bg: var(--bg-card);
+  --neu-text-title: var(--text-primary);
+  --neu-text-sub: var(--text-secondary);
+  --neu-text-muted: var(--text-muted);
+  --neu-accent: var(--primary);
+  --neu-accent-hover: var(--primary-hover);
+  --neu-gold: var(--accent);
+
+  --neu-shadow-convex: 12px 12px 24px #c9cfda, -12px -12px 24px #ffffff;
+  --neu-shadow-convex-sm: 6px 6px 12px #c9cfda, -6px -6px 12px #ffffff;
+  --neu-shadow-convex-btn: 4px 4px 8px #c9cfda, -4px -4px 8px #ffffff;
+  --neu-shadow-inset: inset 4px 4px 8px #c9cfda, inset -4px -4px 8px #ffffff;
+  --neu-shadow-inset-active: inset 3px 3px 6px #c9cfda, inset -3px -3px 6px #ffffff;
+  --neu-shadow-btn-success: 4px 4px 12px rgba(27, 94, 69, 0.35), -4px -4px 12px #ffffff;
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
+
+  --primary: #2ecc71;
+  --primary-dark: #27ae60;
+  --primary-hover: #38e381;
+  --primary-light: #163625;
+  --on-primary: #06150c;
+
+  --secondary: #34d399;
+  --secondary-dark: #2ecc71;
+  --secondary-light: #163625;
+
+  --accent: #fbbf24;
+  --accent-hover: #f59e0b;
+  --accent-light: #2c2411;
+  --accent-contrast: #1c2230;
+
+  --danger: #ef4444;
+  --danger-light: #361919;
+  --badge-discount: #ef4444;
+  --badge-bestseller: #fbbf24;
+
+  --ink: #f2f7f4;
+
+  --gray-50: #121a16;
+  --gray-100: #1a251f;
+  --gray-200: #23332a;
+  --gray-300: #2d4136;
+  --gray-400: #71877b;
+  --gray-500: #a3b8ad;
+  --gray-600: #c2d1c8;
+  --gray-700: #dce5e0;
+  --gray-800: #edf3f0;
+  --gray-900: #f2f7f4;
+
+  --white: #ffffff;
+  --black: #f2f7f4;
+
+  --bg: #0d1310;
   --bg-primary: #0d1310;
   --bg-card: #151f1a;
-  --bg-elevated: #1b2822;
+  --bg-elevated: #1c2822;
   --bg-hover: #22332b;
+  --header-bg: rgba(21, 31, 26, 0.95);
+  --footer-bg: #080c0a;
+  --image-bg: #1c2a22;
   --text-primary: #f2f7f4;
   --text-secondary: #a3b8ad;
   --text-muted: #71877b;
   --border: #23332a;
   --border-color: #23332a;
-  --border-hover: #354d3f;
-  --primary: #2ecc71;
-  --primary-dark: #27ae60;
-  --primary-light: #163625;
-  --secondary: #34d399;
-  --accent: #fbbf24;
-  --accent-hover: #f59e0b;
-  --accent-contrast: #09120c;
-  --badge-discount: #f87171;
-  --badge-bestseller: #fbbf24;
-  --image-bg: #1c2a22;
-  --header-bg: rgba(21, 31, 26, 0.95);
-  --footer-bg: #080c0a;
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 6px 18px -2px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 14px 30px -4px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 20px 40px -6px rgba(0, 0, 0, 0.7);
+
+  --neu-bg: var(--bg-primary);
+  --neu-card-bg: var(--bg-card);
+  --neu-text-title: var(--text-primary);
+  --neu-text-sub: var(--text-secondary);
+  --neu-text-muted: var(--text-muted);
+  --neu-accent: var(--primary);
+  --neu-accent-hover: var(--primary-hover);
+  --neu-gold: var(--accent);
+
+  --neu-shadow-convex: 12px 12px 24px #080d0a, -12px -12px 24px #1c2b22;
+  --neu-shadow-convex-sm: 6px 6px 14px #080d0a, -6px -6px 14px #1f2e25;
+  --neu-shadow-convex-btn: 4px 4px 8px #080d0a, -4px -4px 8px #1f2e25;
+  --neu-shadow-inset: inset 4px 4px 8px #080d0a, inset -4px -4px 8px #1e2b24;
+  --neu-shadow-inset-active: inset 3px 3px 6px #080d0a, inset -3px -3px 6px #1f2e25;
+  --neu-shadow-btn-success: 4px 4px 14px rgba(46, 204, 113, 0.45), -4px -4px 14px #1f2e25;
 }

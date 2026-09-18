@@ -73,7 +73,7 @@ const Theme = {
   },
   syncControls(theme) {
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === 'dark' ? '#0d1310' : '#1B5E45';
+    if (meta) meta.content = theme === 'dark' ? '#0d1310' : '#1b5e45';
     document.querySelectorAll('.theme-toggle').forEach(btn => {
       const dark = theme === 'dark';
       btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
@@ -1283,7 +1283,7 @@ const UI = {
 
     const html = `
       <div class="telegram-auth-box">
-        <div class="tg-badge-icon" style="background: linear-gradient(135deg, #1B5E45 0%, #2ecc71 100%); box-shadow: 0 8px 20px rgba(27, 94, 69, 0.3);">
+        <div class="tg-badge-icon" style="background: linear-gradient(135deg, #0f172a 0%, #3b82f6 100%); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);">
           ${ICONS.telegram}
         </div>
 
@@ -1300,12 +1300,12 @@ const UI = {
           </div>
           <div id="tgPhoneError" style="display:none;color:#ef4444;font-size:13px;margin:-10px 0 14px;text-align:left;"></div>
 
-          <a href="${botUrl}" target="_blank" rel="noopener noreferrer" class="tg-bot-chip" style="width:100%;justify-content:center;color:#1B5E45;margin-bottom:12px;">
+          <a href="${botUrl}" target="_blank" rel="noopener noreferrer" class="tg-bot-chip" style="width:100%;justify-content:center;color:#2563eb;margin-bottom:12px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">${ICONS.telegram}</svg>
             @${botUser} botida /start ni bosing
           </a>
 
-          <button type="button" class="btn btn-primary" id="tgSendOtpBtn" style="width:100%;background:#1B5E45;border-color:#1B5E45;font-size:15px;font-weight:600;height:46px;margin-top:6px;">
+          <button type="button" class="btn btn-primary" id="tgSendOtpBtn" style="width:100%;background:var(--primary);border-color:var(--primary);font-size:15px;font-weight:600;height:46px;margin-top:6px;">
             Tasdiqlash kodini olish
           </button>
 
@@ -1322,7 +1322,7 @@ const UI = {
           </p>
           <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
             <strong id="tgEnteredPhone" style="font-size:16px;color:var(--text-primary);">+998</strong>
-            <button type="button" id="tgChangePhoneBtn" style="background:none;border:none;color:#1B5E45;font-size:13px;cursor:pointer;text-decoration:underline;padding:0;">O'zgartirish</button>
+            <button type="button" id="tgChangePhoneBtn" style="background:none;border:none;color:#2563eb;font-size:13px;cursor:pointer;text-decoration:underline;padding:0;">O'zgartirish</button>
           </div>
 
           <div class="tg-otp-grid">
@@ -1339,14 +1339,14 @@ const UI = {
 
           <div class="tg-timer-text">
             Kodni qayta yuborish: <span class="tg-timer-count" id="tgTimerCount">00:59</span>
-            <button type="button" id="tgResendBtn" style="display:none;background:none;border:none;color:#1B5E45;font-weight:600;cursor:pointer;text-decoration:underline;margin-left:6px;">Qayta yuborish</button>
+            <button type="button" id="tgResendBtn" style="display:none;background:none;border:none;color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;margin-left:6px;">Qayta yuborish</button>
           </div>
 
           <a href="${botUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width:100%;font-size:13px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
             💬 Telegram botni ochish (@${botUser})
           </a>
 
-          <button type="button" class="btn btn-primary" id="tgVerifyBtn" style="width:100%;background:#1B5E45;border-color:#1B5E45;font-size:15px;font-weight:600;height:46px;">
+          <button type="button" class="btn btn-primary" id="tgVerifyBtn" style="width:100%;background:var(--primary);border-color:var(--primary);font-size:15px;font-weight:600;height:46px;">
             Tasdiqlash va kirish
           </button>
         </div>
@@ -1442,7 +1442,7 @@ const UI = {
             ? 'Demo rejim: tasdiqlash kodi <strong>123456</strong>.'
             : `6 xonali tasdiqlash kodi <strong>@${botUser}</strong> botingizga yuborildi. Telegramdagi xabarni tekshiring.`;
           otpNotice.style.display = 'block';
-          otpNotice.style.borderColor = '#1B5E45';
+          otpNotice.style.borderColor = 'var(--primary)';
           otpNotice.style.color = 'var(--text-primary)';
         }
       } else {
@@ -1660,7 +1660,7 @@ const UI = {
     const providerTitle = isGoogle ? "Google orqali ro'yxatdan o'tish" : "Telegram orqali ro'yxatdan o'tish";
     const providerBadge = isGoogle
       ? `<svg width="28" height="28" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>`
-      : `<div style="color:#1B5E45;display:flex;align-items:center;justify-content:center;">${ICONS.telegram}</div>`;
+      : `<div style="color:#0088cc;display:flex;align-items:center;justify-content:center;">${ICONS.telegram}</div>`;
 
     const html = `
       <div class="social-complete-box">
@@ -2296,7 +2296,7 @@ const ProductDetail = {
       </div>
       <div class="product-meta-row">
         <button type="button" class="link-btn" id="shareProduct">${ICONS.arrowRight} Ulashish</button>
-        <button type="button" class="link-btn" id="wishDetail">${Store.isInWishlist(p.id) ? ICONS.heartFilled : ICONS.heart} Sevimlilarga</button>
+        <button type="button" class="link-btn${Store.isInWishlist(p.id) ? ' active' : ''}" id="wishDetail">${Store.isInWishlist(p.id) ? ICONS.heartFilled : ICONS.heart} Sevimlilarga</button>
         <a class="link-btn" href="store.html?id=${p.storeId || 1}">${ICONS.store} Sotuvchi</a>
       </div>`;
 
@@ -2329,7 +2329,10 @@ const ProductDetail = {
       const res = Store.toggleWishlist(p.id);
       UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
       const btn = document.getElementById('wishDetail');
-      if (btn) btn.innerHTML = `${res.added ? ICONS.heartFilled : ICONS.heart} Sevimlilarga`;
+      if (btn) {
+        btn.classList.toggle('active', res.added);
+        btn.innerHTML = `${res.added ? ICONS.heartFilled : ICONS.heart} Sevimlilarga`;
+      }
     });
     document.getElementById('shareProduct')?.addEventListener('click', async () => {
       const url = location.href;
@@ -2930,11 +2933,11 @@ const Auth = {
     container.innerHTML = `
       <div class="card card--logged-in" style="width:100%;text-align:center;padding:40px 28px;box-sizing:border-box;">
         <div style="margin-bottom:18px;">
-          ${user.avatar ? `<img src="${user.avatar}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">` : `<div style="width:80px;height:80px;border-radius:50%;background:#1B5E45;color:white;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">${UI.initials(user)}</div>`}
+          ${user.avatar ? `<img src="${user.avatar}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">${UI.initials(user)}</div>`}
         </div>
         <h2 style="font-size:24px;font-weight:700;color:var(--neu-text-title);margin:0 0 6px;">${user.name}</h2>
         <p style="font-size:14px;color:var(--neu-text-sub);margin:0 0 16px;">${user.email}</p>
-        <div style="display:inline-block;padding:5px 16px;border-radius:20px;background:rgba(27,94,69,0.12);color:#1B5E45;font-size:12px;font-weight:700;margin-bottom:28px;">
+        <div style="display:inline-block;padding:5px 16px;border-radius:20px;background:rgba(15,23,42,0.08);color:var(--text-primary);font-size:12px;font-weight:700;margin-bottom:28px;">
           ✓ Siz allaqachon tizimga kirgansiz
         </div>
         <div style="display:flex;flex-direction:column;gap:12px;">
@@ -3869,6 +3872,30 @@ function initHeader() {
   const catToggle = document.getElementById('categoriesToggle');
   const catDD = document.getElementById('categoriesDropdown');
   if (catToggle && catDD && typeof CATEGORIES !== 'undefined') {
+    const adjustDropdownPosition = () => {
+      if (!catDD.classList.contains('active')) {
+        catDD.style.transform = '';
+        return;
+      }
+      if (window.innerWidth > 768) {
+        catDD.style.transform = '';
+        requestAnimationFrame(() => {
+          const rect = catDD.getBoundingClientRect();
+          if (rect.right > window.innerWidth - 16) {
+            const shift = rect.right - (window.innerWidth - 16);
+            catDD.style.transform = `translateX(-${shift}px)`;
+          } else if (rect.left < 16) {
+            const shift = 16 - rect.left;
+            catDD.style.transform = `translateX(${shift}px)`;
+          } else {
+            catDD.style.transform = '';
+          }
+        });
+      } else {
+        catDD.style.transform = '';
+      }
+    };
+
     catToggle.addEventListener('click', e => {
       e.stopPropagation();
       if (!catDD.innerHTML.trim()) {
@@ -3878,12 +3905,18 @@ function initHeader() {
             <div><strong>${c.name}</strong><p>${c.count} ta kitob</p></div>
           </a>`).join('')}</div>`;
       }
-      catDD.classList.toggle('active');
-      catToggle.setAttribute('aria-expanded', String(catDD.classList.contains('active')));
-      document.body.classList.toggle('cats-open', catDD.classList.contains('active'));
+      const willBeActive = !catDD.classList.contains('active');
+      catDD.classList.toggle('active', willBeActive);
+      catToggle.classList.toggle('active', willBeActive);
+      catToggle.setAttribute('aria-expanded', String(willBeActive));
+      document.body.classList.toggle('cats-open', willBeActive);
       miniCart?.classList.remove('active');
       userDD?.classList.remove('active');
+
+      adjustDropdownPosition();
     });
+
+    window.addEventListener('resize', adjustDropdownPosition, { passive: true });
   }
 
   miniCart?.addEventListener('click', e => e.stopPropagation());
@@ -3894,11 +3927,15 @@ function initHeader() {
   document.addEventListener('click', () => {
     miniCart?.classList.remove('active');
     userDD?.classList.remove('active');
-    catDD?.classList.remove('active');
+    if (catDD) {
+      catDD.classList.remove('active');
+      catDD.style.transform = '';
+    }
     document.body.classList.remove('cats-open');
     cartToggle?.setAttribute('aria-expanded', 'false');
     userToggle?.setAttribute('aria-expanded', 'false');
     catToggle?.setAttribute('aria-expanded', 'false');
+    catToggle?.classList.remove('active');
   });
 
   // Mobile menu
@@ -4278,16 +4315,18 @@ function initBottomNav() {
    15. EVENT DELEGATION
    ======================================================================== */
 document.addEventListener('click', e => {
-  const wlBtn = e.target.closest('.product-card__wishlist');
+  const wlBtn = e.target.closest('.product-card__wishlist, .quick-view__wishlist-btn');
   if (wlBtn) {
     e.preventDefault();
     e.stopPropagation();
     const id = +wlBtn.dataset.id;
     const res = Store.toggleWishlist(id);
-    wlBtn.classList.toggle('active', res.added);
-    wlBtn.innerHTML = res.added ? ICONS.heartFilled : ICONS.heart;
-    wlBtn.style.transform = 'scale(1.3)';
-    setTimeout(() => wlBtn.style.transform = '', 300);
+    document.querySelectorAll(`.product-card__wishlist[data-id="${id}"], .quick-view__wishlist-btn[data-id="${id}"]`).forEach(btn => {
+      btn.classList.toggle('active', res.added);
+      btn.innerHTML = res.added ? ICONS.heartFilled : ICONS.heart;
+      btn.style.transform = 'scale(1.25)';
+      setTimeout(() => btn.style.transform = '', 300);
+    });
     UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
     if (document.body.dataset.page === 'wishlist' && !res.added) WishlistPage.init();
     return;
@@ -4412,7 +4451,12 @@ function enhanceChrome() {
     if (event.key !== 'Escape') return;
     document.getElementById('miniCart')?.classList.remove('active');
     document.getElementById('userDropdown')?.classList.remove('active');
-    document.getElementById('categoriesDropdown')?.classList.remove('active');
+    const catDD = document.getElementById('categoriesDropdown');
+    if (catDD) {
+      catDD.classList.remove('active');
+      catDD.style.transform = '';
+    }
+    document.getElementById('categoriesToggle')?.classList.remove('active');
     document.getElementById('mobileMenu')?.classList.remove('active');
     document.getElementById('mobileOverlay')?.classList.remove('active');
     document.body.classList.remove('cats-open');

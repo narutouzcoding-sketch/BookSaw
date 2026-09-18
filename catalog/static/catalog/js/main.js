@@ -274,6 +274,19 @@ function runBinEatAnimation(button, onComplete) {
   }, Math.max(200, totalEatTime - 40));
 }
 
+function requireAuth(message = "Bu amalni bajarish uchun tizimga kiring") {
+  if (!Store.isLoggedIn()) {
+    UI.showToast(message, "info", 2500);
+    const currentPath = location.pathname.split('/').pop() || 'book_list.html';
+    const redirectUrl = currentPath + location.search;
+    setTimeout(() => {
+      location.href = `login.html?redirect=${encodeURIComponent(redirectUrl)}`;
+    }, 600);
+    return false;
+  }
+  return true;
+}
+
 function createBinButtonHtml(text, colorClass = 'danger', id = '') {
   const chars = text.split('').map(c => `<span class="char">${c}</span>`).join('');
   return `<button type="button" class="eat-btn ${colorClass}" ${id ? `id="${id}"` : ''} title="${text}">
@@ -1996,12 +2009,74 @@ const Search = {
     });
 
     document.addEventListener('click', e => {
-      if (!inputEl.contains(e.target) && !suggestionsEl.contains(e.target)) {
-        suggestionsEl.classList.remove('active');
-        selectedIndex = -1;
-      }
-    });
+  // 1. SEVIMLILAR (WISHLIST) TUGMASI BOSILGANDA
+  const wlBtn = e.target.closest('.product-card__wishlist, .quick-view__wishlist-btn');
+  if (wlBtn) {
+    e.preventDefault();
+    e.stopPropagation();
 
+    // Faqat login qilganlar uchun ruxsat
+    if (!requireAuth("Sevimlilarga qo'shish uchun avval hisobingizga kiring!")) {
+      return;
+    }
+
+    const id = +wlBtn.dataset.id;
+    const res = Store.toggleWishlist(id);
+    document.querySelectorAll(`.product-card__wishlist[data-id="${id}"], .quick-view__wishlist-btn[data-id="${id}"]`).forEach(btn => {
+      btn.classList.toggle('active', res.added);
+      btn.innerHTML = res.added ? ICONS.heartFilled : ICONS.heart;
+      btn.style.transform = 'scale(1.25)';
+      setTimeout(() => btn.style.transform = '', 300);
+    });
+    UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
+    if (document.body.dataset.page === 'wishlist' && !res.added) WishlistPage.init();
+    return;
+  }
+
+  // 2. SAVATGA QO'SHISH TUGMASI BOSILGANDA
+  const cartBtn = e.target.closest('.add-to-cart-btn');
+  if (cartBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Faqat login qilganlar uchun ruxsat
+    if (!requireAuth("Kitobni savatga qo'shish uchun avval hisobingizga kiring!")) {
+      return;
+    }
+
+    if (cartBtn.disabled) return;
+    const id = +cartBtn.dataset.id;
+    const product = PRODUCTS.find(pr => pr.id === id);
+    if (product && !product.inStock) { UI.showToast('Mahsulot tugagan', 'error'); return; }
+    Store.addToCart(id);
+    UI.showToast("Savatga qo'shildi!");
+    Animations.flyToCart(cartBtn);
+    return;
+  }
+
+  // Tez ko'rish va Card navigatsiyasi o'zgarishsiz qoladi
+  const qvBtn = e.target.closest('.quick-view-btn');
+  if (qvBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    UI.showQuickView(+qvBtn.dataset.id);
+    return;
+  }
+
+  const card = e.target.closest('.product-card[data-href], .blog-card[data-href]');
+  if (card) {
+    if (e.target.closest('button, input, select, label')) return;
+    const href = card.dataset.href;
+    if (!href) return;
+    const img = card.querySelector('.product-card__image--primary');
+    if (img && href.includes('book_detail')) {
+      document.querySelectorAll('.product-card__image--primary').forEach(i => { i.style.viewTransitionName = ''; });
+      const id = new URL(href, location.href).searchParams.get('id');
+      if (id) img.style.viewTransitionName = 'book-' + id;
+    }
+    location.href = href;
+  }
+});
     // Global keyboard shortcut: Ctrl+K, Cmd+K or / to focus search
     if (!window._searchShortcutBound) {
       window._searchShortcutBound = true;
@@ -2283,6 +2358,7 @@ const ProductDetail = {
     document.getElementById('qtyPlus')?.addEventListener('click', () => { let v = +qtyInput.value; if (v < 10) qtyInput.value = v + 1; });
     // Add to cart
     document.getElementById('addToCartDetail')?.addEventListener('click', () => {
+      if (!requireAuth("Savatga qo'shish uchun tizimga kiring!")) return;
       const qty = parseInt(qtyInput?.value) || 1;
       const variant = infoEl.querySelector('.variant-option.selected')?.dataset.variant || null;
       Store.addToCart(p.id, qty, variant);
@@ -2291,11 +2367,13 @@ const ProductDetail = {
     });
     // Buy now
     document.getElementById('buyNowDetail')?.addEventListener('click', () => {
+      if (!requireAuth("Xarid qilish uchun avval hisobingizga kiring!")) return;
       const qty = parseInt(qtyInput?.value) || 1;
       Store.addToCart(p.id, qty);
       location.href = 'checkout.html';
     });
     document.getElementById('wishDetail')?.addEventListener('click', () => {
+      if (!requireAuth("Sevimlilarga qo'shish uchun tizimga kiring!")) return;
       const res = Store.toggleWishlist(p.id);
       UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
       const btn = document.getElementById('wishDetail');
@@ -2328,6 +2406,7 @@ const ProductDetail = {
     </div>`;
     document.body.appendChild(bar);
     document.getElementById('stickyAdd')?.addEventListener('click', () => {
+      if (!requireAuth("Savatga qo'shish uchun tizimga kiring!")) return;
       const qty = parseInt(document.getElementById('qtyInput')?.value) || 1;
       Store.addToCart(p.id, qty);
       UI.showToast("Savatga qo'shildi!");
@@ -2434,8 +2513,8 @@ const ProductDetail = {
       });
       document.getElementById('reviewForm')?.addEventListener('submit', e => {
         e.preventDefault();
+        if (!requireAuth("Sharh qoldirish uchun tizimga kiring!")) return;
         const user = Store.getUser();
-        if (!user) { location.href = 'login.html'; return; }
         const text = (document.getElementById('reviewText')?.value || '').trim();
         if (text.length < 8) { UI.showToast('Sharh kamida 8 belgi', 'error'); return; }
         Store.addReview(p.id, { id: Date.now(), userName: user.name, rating: picked, date: new Date().toISOString(), text, helpful: 0 });
@@ -2470,8 +2549,8 @@ const ProductDetail = {
           </div>`).join('') : '<p class="empty-hint">Hozircha savollar yo‘q.</p>'}`;
       document.getElementById('qnaForm')?.addEventListener('submit', e => {
         e.preventDefault();
+        if (!requireAuth("Savol berish uchun tizimga kiring!")) return;
         const user = Store.getUser();
-        if (!user) { location.href = 'login.html'; return; }
         const text = (document.getElementById('qnaText')?.value || '').trim();
         if (text.length < 6) { UI.showToast('Savolni to‘liq yozing', 'error'); return; }
         Store.addQuestion(p.id, { id: Date.now(), userName: user.name, date: new Date().toISOString(), text, answer: '' });
@@ -2495,6 +2574,7 @@ const CartPage = {
   promoApplied: null,
   _bound: false,
   init() {
+    if (!requireAuth("Savatni ko'rish uchun avval hisobingizga kiring!")) return;
     this.promoApplied = Store.getPromo();
     this.bindEvents();
     this.render();
@@ -3288,8 +3368,8 @@ const ProfilePage = {
     });
   },
   init() {
+    if (!requireAuth("Profilingizni ko'rish uchun avval hisobingizga kiring!")) return;
     const user = Store.getUser();
-    if (!user) { location.href = 'login.html'; return; }
     document.getElementById('profileName').textContent = user.name;
     document.getElementById('profileEmail').textContent = user.email;
     document.getElementById('profName').value = user.name || '';
@@ -3517,6 +3597,7 @@ const ProfilePage = {
    ======================================================================== */
 const OrdersPage = {
   init() {
+    if (!requireAuth("Buyurtmalaringizni ko'rish uchun avval hisobingizga kiring!")) return;
     const orders = Store.getOrders();
     const listEl = document.getElementById('ordersList');
     const emptyEl = document.getElementById('emptyOrders');
@@ -3584,6 +3665,7 @@ const OrdersPage = {
    ======================================================================== */
 const WishlistPage = {
   init() {
+    if (!requireAuth("Sevimlilar ro'yxatini ko'rish uchun avval hisobingizga kiring!")) return;
     const wl = Store.getWishlist();
     const gridEl = document.getElementById('wishlistGrid');
     const emptyEl = document.getElementById('emptyWishlist');
@@ -4326,58 +4408,10 @@ function initBottomNav() {
 
 /* ========================================================================
    15. EVENT DELEGATION
+   (savatga qo'shish / sevimlilar / tez ko'rish / card navigatsiyasi
+   yuqorida Search.initAutocomplete() ichida requireAuth bilan
+   himoyalangan holda ro'yxatdan o'tkazilgan — bu yerda takrorlanmaydi)
    ======================================================================== */
-document.addEventListener('click', e => {
-  const wlBtn = e.target.closest('.product-card__wishlist, .quick-view__wishlist-btn');
-  if (wlBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-    const id = +wlBtn.dataset.id;
-    const res = Store.toggleWishlist(id);
-    document.querySelectorAll(`.product-card__wishlist[data-id="${id}"], .quick-view__wishlist-btn[data-id="${id}"]`).forEach(btn => {
-      btn.classList.toggle('active', res.added);
-      btn.innerHTML = res.added ? ICONS.heartFilled : ICONS.heart;
-      btn.style.transform = 'scale(1.25)';
-      setTimeout(() => btn.style.transform = '', 300);
-    });
-    UI.showToast(res.added ? "Sevimlilarga qo'shildi" : "Sevimlilardan o'chirildi");
-    if (document.body.dataset.page === 'wishlist' && !res.added) WishlistPage.init();
-    return;
-  }
-  const cartBtn = e.target.closest('.add-to-cart-btn');
-  if (cartBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (cartBtn.disabled) return;
-    const id = +cartBtn.dataset.id;
-    const product = PRODUCTS.find(pr => pr.id === id);
-    if (product && !product.inStock) { UI.showToast('Mahsulot tugagan', 'error'); return; }
-    Store.addToCart(id);
-    UI.showToast("Savatga qo'shildi!");
-    Animations.flyToCart(cartBtn);
-    return;
-  }
-  const qvBtn = e.target.closest('.quick-view-btn');
-  if (qvBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-    UI.showQuickView(+qvBtn.dataset.id);
-    return;
-  }
-  const card = e.target.closest('.product-card[data-href], .blog-card[data-href]');
-  if (card) {
-    if (e.target.closest('button, input, select, label')) return;
-    const href = card.dataset.href;
-    if (!href) return;
-    const img = card.querySelector('.product-card__image--primary');
-    if (img && href.includes('book_detail')) {
-      document.querySelectorAll('.product-card__image--primary').forEach(i => { i.style.viewTransitionName = ''; });
-      const id = new URL(href, location.href).searchParams.get('id');
-      if (id) img.style.viewTransitionName = 'book-' + id;
-    }
-    location.href = href;
-  }
-});
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
   const card = e.target.closest('.product-card[data-href], .blog-card[data-href]');

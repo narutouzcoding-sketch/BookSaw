@@ -51,9 +51,9 @@ function openLightbox(src, alt) {
 const ProductDetail = {
   product: null,
 
-  init() {
+  async init() {
     const id = parseInt(new URLSearchParams(location.search).get('id'), 10);
-    this.product = getProducts().find(p => p.id === id);
+    this.product = window.Api ? await window.Api.getProduct(id) : getProducts().find(p => p.id === id);
     if (!this.product) {
       const el = document.getElementById('productDetail');
       if (el) el.innerHTML = `<div class="empty-state"><div class="empty-state__icon">${ICONS.book}</div><h3 class="empty-state__title">Mahsulot topilmadi</h3><a href="book_list.html" class="btn btn-primary">Bosh sahifaga</a></div>`;
@@ -62,8 +62,8 @@ const ProductDetail = {
     Store.addRecent(this.product.id);
     this.renderInfo();
     this.initGallery();
-    this.initTabs();
-    this.renderSimilar();
+    await this.initTabs();
+    await this.renderSimilar();
     this.renderStickyBar();
     document.title = this.product.name + ' — Booksaw';
   },

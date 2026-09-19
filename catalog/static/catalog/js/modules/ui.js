@@ -217,8 +217,8 @@ const UI = {
     document.getElementById('confirmOk').onclick = () => { close(); onConfirm(); };
   },
 
-  showQuickView(productId) {
-    const p = PRODUCTS.find(pr => pr.id === productId);
+  async showQuickView(productId) {
+    const p = window.Api ? await window.Api.getProduct(productId) : (typeof PRODUCTS !== 'undefined' ? PRODUCTS.find(pr => pr.id === productId) : null);
     if (!p) return;
     const inWL = Store.isInWishlist(p.id);
     const html = `<div class="quick-view__container">
@@ -297,7 +297,7 @@ const UI = {
         miniItems.innerHTML = '<p class="text-center text-muted" style="padding:20px">Savat bo\'sh</p>';
       } else {
         miniItems.innerHTML = cart.slice(0, 3).map(ci => {
-          const p = PRODUCTS.find(pr => pr.id === ci.productId);
+          const p = (window.Api && window.Api.getCachedProduct(ci.productId)) || (typeof PRODUCTS !== 'undefined' ? PRODUCTS.find(pr => pr.id === ci.productId) : null);
           if (!p) return '';
           return `<div class="mini-cart__item" style="display:flex;gap:12px;padding:12px;border-bottom:1px solid var(--gray-100)">
             <img src="${sanitizeUrl(p.image)}" alt="" style="width:50px;height:60px;object-fit:cover;border-radius:6px">
@@ -372,8 +372,11 @@ const UI = {
   },
 
   formatPrice(price) {
-    if (price == null) return '';
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + " so'm";
+    if (price == null || price === '') return '';
+    const str = String(price);
+    const [intPart, fracPart] = str.split('.');
+    const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return (fracPart && fracPart !== '00' ? formatted + '.' + fracPart : formatted) + " so'm";
   },
   formatDate(iso) {
     if (!iso) return '';

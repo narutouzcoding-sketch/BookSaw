@@ -13,19 +13,47 @@ if (typeof globalThis.window === 'undefined' || !globalThis.window.addEventListe
   const win = new EventTarget();
   win.localStorage = globalThis.localStorage;
   win.sessionStorage = globalThis.sessionStorage;
+  win.scrollTo = () => {};
+
+  const elementsById = new Map();
+
   win.document = {
     querySelectorAll: () => [],
     querySelector: () => null,
-    getElementById: () => null,
-    createElement: (tag) => ({
-      tagName: tag.toUpperCase(),
-      className: '',
-      id: '',
-      setAttribute: () => {},
-      appendChild: () => {},
+    getElementById: (id) => elementsById.get(id) || null,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    createElement: (tag) => {
+      const el = {
+        tagName: tag.toUpperCase(),
+        className: '',
+        _id: '',
+        get id() { return this._id; },
+        set id(val) { this._id = val; elementsById.set(val, this); },
+        setAttribute: () => {},
+        appendChild: () => {},
+        classList: {
+          _classes: new Set(),
+          add(c) { this._classes.add(c); },
+          remove(c) { this._classes.delete(c); },
+          contains(c) { return this._classes.has(c); }
+        },
+        _childImg: { src: '', alt: '' },
+        querySelector: (sel) => {
+          if (sel === 'img') return el._childImg;
+          return null;
+        },
+        addEventListener: () => {}
+      };
+      return el;
+    },
+    body: {
+      dataset: {},
+      appendChild: (child) => {
+        if (child && child.id) elementsById.set(child.id, child);
+      },
       classList: { add: () => {}, remove: () => {} }
-    }),
-    body: { appendChild: () => {}, classList: { add: () => {}, remove: () => {} } }
+    }
   };
   globalThis.window = win;
   globalThis.document = win.document;

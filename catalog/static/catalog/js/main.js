@@ -3930,6 +3930,34 @@ document.addEventListener('DOMContentLoaded', () => {
   enhanceChrome();
 });
 
+// BFCache (Back-Forward Cache): Brauzer orqaga/oldinga tugmalari bosilganda savat va nishonlarni yangilash
+window.addEventListener('pageshow', () => {
+  UI.updateBadges();
+  if (document.body.dataset.page === 'cart' && typeof CartPage !== 'undefined' && CartPage.render) {
+    CartPage.render();
+  }
+});
+
+// Boshqa oyna yoki tabda savat/sevimlilar o'zgarganda avtomatik sinxronlash
+window.addEventListener('storage', (e) => {
+  if (!e.key || e.key.includes('cart') || e.key.includes('wishlist') || e.key.includes('user')) {
+    UI.updateBadges();
+    if (document.body.dataset.page === 'cart' && typeof CartPage !== 'undefined' && CartPage.render) {
+      CartPage.render();
+    }
+  }
+});
+
+// Sahifaga qayta fokus qilinganda yoki tab aktivlashganda yangilash
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    UI.updateBadges();
+  }
+});
+window.addEventListener('focus', () => {
+  UI.updateBadges();
+});
+
 function initHeader() {
   const header = document.getElementById('header');
   // Make every interactive menu understandable to keyboard and screen-reader users.
@@ -3975,6 +4003,7 @@ function initHeader() {
     cartToggle.addEventListener('click', e => {
       e.stopPropagation();
       if (!requireAuth("Savatni ko'rish uchun avval hisobingizga kiring!")) return;
+      UI.updateBadges();
       miniCart.classList.toggle('active');
       cartToggle.setAttribute('aria-expanded', String(miniCart.classList.contains('active')));
       document.getElementById('userDropdown')?.classList.remove('active');

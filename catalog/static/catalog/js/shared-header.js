@@ -173,6 +173,10 @@
       } catch (err) {}
       location.reload();
     });
+
+    if (window.UI && typeof window.UI.updateBadges === 'function') {
+      window.UI.updateBadges();
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true });
   else mount();

@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cd0bd4d3-2212-4490-a28c-86dcb27eda54" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="cd0bd4d3-2212-4490-a28c-86dcb27eda54" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,23 +22,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.003831719223819" />
-      <entry key="MS500" value="1.798619561012651" />
-      <entry key="S2" value="4.801696851017811" />
-      <entry key="S5" value="8.61211437551334" />
-      <entry key="S10" value="11.411523113259548" />
-      <entry key="S30" value="14.200625134491537" />
-      <entry key="S60" value="15.06071218774462" />
-      <entry key="M2" value="15.519948029491973" />
-      <entry key="M5" value="15.805413910158224" />
-      <entry key="M10" value="15.906850416286046" />
-      <entry key="M15" value="16.018680508657077" />
-      <entry key="M30" value="17.644326063254933" />
-      <entry key="H1" value="24.41736239095423" />
-      <entry key="H2" value="38.961894260479845" />
-      <entry key="H4" value="66.39262292101503" />
-      <entry key="D1" value="188.61630324655425" />
-      <entry key="W1" value="247.75043863211667" />
+      <entry key="MS100" value="1.0035383296149651" />
+      <entry key="MS500" value="1.7152695977989592" />
+      <entry key="S2" value="4.40059425240924" />
+      <entry key="S5" value="7.8198694705752745" />
+      <entry key="S10" value="10.677206448713855" />
+      <entry key="S30" value="13.823534592834196" />
+      <entry key="S60" value="14.850145046423945" />
+      <entry key="M2" value="15.408767494549883" />
+      <entry key="M5" value="15.902424364665553" />
+      <entry key="M10" value="17.39228080240912" />
+      <entry key="M15" value="19.25741675591794" />
+      <entry key="M30" value="24.014231741873107" />
+      <entry key="H1" value="32.47736232912192" />
+      <entry key="H2" value="48.015768880223185" />
+      <entry key="H4" value="76.18855633317278" />
+      <entry key="D1" value="201.5591455260512" />
+      <entry key="W1" value="263.1727927881569" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -50,35 +48,35 @@
       <entry key="S10" value="0.0" />
       <entry key="S30" value="0.0" />
       <entry key="S60" value="0.0" />
-      <entry key="M2" value="4.415478731783394E-167" />
-      <entry key="M5" value="1.002372903836049E-66" />
-      <entry key="M10" value="3.584104397393857E-33" />
-      <entry key="M15" value="5.868745016177449E-22" />
-      <entry key="M30" value="1.0328578066541162E-10" />
-      <entry key="H1" value="4.543219026573425E-5" />
-      <entry key="H2" value="0.030666053714560697" />
-      <entry key="H4" value="0.800936373332711" />
-      <entry key="D1" value="12.180380512133329" />
-      <entry key="W1" value="19.427735992794005" />
+      <entry key="M2" value="3.44079913317442E-172" />
+      <entry key="M5" value="9.071976727627009E-69" />
+      <entry key="M10" value="3.409706172969955E-34" />
+      <entry key="M15" value="1.2230271851150736E-22" />
+      <entry key="M30" value="4.715046403672755E-11" />
+      <entry key="H1" value="3.06963255335697E-5" />
+      <entry key="H2" value="0.02520688910533323" />
+      <entry key="H4" value="0.726153936969331" />
+      <entry key="D1" value="11.983011303631034" />
+      <entry key="W1" value="19.382448463104673" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.6680352644440913" />
-      <entry key="MS500" value="1.713958498904474" />
-      <entry key="S2" value="4.765533843669097" />
-      <entry key="S5" value="8.583881761659509" />
-      <entry key="S10" value="11.39154304428917" />
-      <entry key="S30" value="14.191922080783385" />
-      <entry key="S60" value="15.056039718319854" />
-      <entry key="M2" value="15.517525678934884" />
-      <entry key="M5" value="15.804423502676704" />
-      <entry key="M10" value="15.906351459840606" />
-      <entry key="M15" value="16.01834581927445" />
-      <entry key="M30" value="17.644146094119876" />
-      <entry key="H1" value="24.417292507397462" />
-      <entry key="H2" value="38.992464599383325" />
-      <entry key="H4" value="67.19334211723304" />
-      <entry key="D1" value="200.7962785015693" />
-      <entry key="W1" value="267.17808373188956" />
+      <entry key="MS100" value="0.6911465436945836" />
+      <entry key="MS500" value="1.6362579139864184" />
+      <entry key="S2" value="4.369273198792362" />
+      <entry key="S5" value="7.797138440217198" />
+      <entry key="S10" value="10.661211667845219" />
+      <entry key="S30" value="13.81649124685393" />
+      <entry key="S60" value="14.846344418251531" />
+      <entry key="M2" value="15.406791350941193" />
+      <entry key="M5" value="15.90160591870235" />
+      <entry key="M10" value="17.391825348909006" />
+      <entry key="M15" value="19.257074290783418" />
+      <entry key="M30" value="24.0140128619782" />
+      <entry key="H1" value="32.47724665922823" />
+      <entry key="H2" value="48.04086284427904" />
+      <entry key="H4" value="76.9144962401751" />
+      <entry key="D1" value="213.54175528343052" />
+      <entry key="W1" value="282.55515016211854" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -90,31 +88,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.BooksCatalog.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/My Projects/BooksCatalog",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "settings.editor.selected.configurable": "reference.settings.ide.settings.web.browsers"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Django Server.BooksCatalog.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/My Projects/BooksCatalog&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.web.browsers&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="BooksCatalog" type="Python.DjangoServer" factoryName="Django server">
       <module name="BooksCatalog" />
@@ -165,6 +163,7 @@
       <workItem from="1789539660259" duration="11852000" />
       <workItem from="1789617028713" duration="21323000" />
       <workItem from="1789704143834" duration="737000" />
+      <workItem from="1789789822164" duration="396000" />
     </task>
     <servers />
   </component>

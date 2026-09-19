@@ -7463,11 +7463,11 @@ h1, h2 {
   transition: background 0.35s ease, box-shadow 0.35s ease;
 }
 .neu-bg-shape--1 {
-  width: 260px;
-  height: 260px;
-  top: -80px;
-  left: -80px;
-  opacity: 0.55;
+  width: 380px;
+  height: 380px;
+  top: -90px;
+  left: -90px;
+  opacity: 0.6;
 }
 .neu-bg-shape--2 {
   width: 200px;
@@ -8283,6 +8283,12 @@ h1, h2 {
     border-radius: 24px;
     padding: 24px 18px;
   }
+  .neu-bg-shape--1 {
+    width: 280px;
+    height: 280px;
+    top: -70px;
+    left: -70px;
+  }
   .neu-back-link {
     top: 12px;
     left: 12px;
@@ -8821,6 +8827,13 @@ body.dark-mode .switch-chassis.compact .thumb-slider {
   .neu-auth-page {
     padding-top: 64px !important;
     position: relative !important;
+  }
+
+  .neu-bg-shape--1 {
+    width: 240px;
+    height: 240px;
+    top: -60px;
+    left: -60px;
   }
 
   /* Orqaga qaytish tugmasini ixchamlashtirib, chap burchakka to'g'ri joylashtiramiz */

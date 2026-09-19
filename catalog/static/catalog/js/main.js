@@ -3,6 +3,7 @@
  * To'liq biznes-mantiq: Store, UI, Qidiruv, Filtr, Slider, Detail, Cart, Checkout, Auth, Profile, Orders, Wishlist, Animatsiyalar
  * Barcha sahifalar uchun universal JS — data-page atributi orqali tegishli init funksiya chaqiriladi.
  */
+import { escapeHtml, sanitizeUrl, highlightMatch } from './modules/escape.js';
 
 const ICONS = {
   search: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
@@ -980,15 +981,9 @@ const Store = {
    2. UI UTILITIES
    ======================================================================== */
 const UI = {
-  escapeHtml(str) {
-    if (str == null) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  },
+  escapeHtml,
+  sanitizeUrl,
+  highlightMatch,
   showToast(message, type = 'success', duration = 3000) {
     let c = document.getElementById('toastContainer');
     if (!c) { c = document.createElement('div'); c.className = 'toast-container'; c.id = 'toastContainer'; document.body.appendChild(c); }
@@ -1041,7 +1036,7 @@ const UI = {
       <div class="quick-view__image-col">
         <div class="quick-view__book-wrapper">
           <div class="quick-view__book-cover">
-            <img src="${p.image}" alt="${p.name}" class="quick-view__img">
+            <img src="${sanitizeUrl(p.image)}" alt="${escapeHtml(p.name)}" class="quick-view__img">
             <div class="quick-view__book-spine"></div>
             ${p.discount ? `<span class="badge badge-sale quick-view__sale-badge">-${p.discount}%</span>` : ''}
           </div>
@@ -1049,15 +1044,15 @@ const UI = {
       </div>
       <div class="quick-view__info-col">
         <div class="quick-view__tags-row">
-          <span class="quick-view__category">${p.categoryName}</span>
+          <span class="quick-view__category">${escapeHtml(p.categoryName)}</span>
           ${p.inStock 
             ? '<span class="badge badge-success quick-view__stock-badge"><i class="fa-solid fa-check"></i> Mavjud</span>' 
             : '<span class="badge badge-danger quick-view__stock-badge"><i class="fa-solid fa-xmark"></i> Tugagan</span>'
           }
         </div>
         
-        <h2 class="quick-view__title">${p.name}</h2>
-        <p class="quick-view__author"><i class="fa-solid fa-user-pen"></i> <span>${p.author}</span></p>
+        <h2 class="quick-view__title">${escapeHtml(p.name)}</h2>
+        <p class="quick-view__author"><i class="fa-solid fa-user-pen"></i> <span>${escapeHtml(p.author)}</span></p>
         
         <div class="quick-view__rating-row">
           <span class="quick-view__stars">${renderStars(p.rating)}</span>
@@ -1072,7 +1067,7 @@ const UI = {
         </div>
 
         <p class="quick-view__desc">
-          ${p.description || "Ushbu asar jahon adabiyoti va zamonaviy kitobxonlikning sara namunalaridan biri bo'lib, chuqur ma'no va qiziqarli voqealarga boy."}
+          ${escapeHtml(p.description || "Ushbu asar jahon adabiyoti va zamonaviy kitobxonlikning sara namunalaridan biri bo'lib, chuqur ma'no va qiziqarli voqealarga boy.")}
         </p>
 
         <div class="quick-view__actions">
@@ -1116,8 +1111,8 @@ const UI = {
           const p = PRODUCTS.find(pr => pr.id === ci.productId);
           if (!p) return '';
           return `<div class="mini-cart__item" style="display:flex;gap:12px;padding:12px;border-bottom:1px solid var(--gray-100)">
-            <img src="${p.image}" alt="" style="width:50px;height:60px;object-fit:cover;border-radius:6px">
-            <div style="flex:1;min-width:0"><p style="font-weight:600;font-size:13px" class="text-truncate">${p.name}</p><p style="font-size:13px;color:var(--gray-500)">${ci.qty} × ${UI.formatPrice(p.price)}</p></div>
+            <img src="${sanitizeUrl(p.image)}" alt="" style="width:50px;height:60px;object-fit:cover;border-radius:6px">
+            <div style="flex:1;min-width:0"><p style="font-weight:600;font-size:13px" class="text-truncate">${escapeHtml(p.name)}</p><p style="font-size:13px;color:var(--gray-500)">${ci.qty} × ${UI.formatPrice(p.price)}</p></div>
           </div>`;
         }).join('') + (cart.length > 3 ? `<p style="text-align:center;padding:8px;color:var(--gray-400);font-size:13px">+${cart.length - 3} ta mahsulot</p>` : '');
       }
@@ -1146,7 +1141,7 @@ const UI = {
           const img = document.createElement('img');
           img.className = 'header-avatar';
           img.alt = user.name || 'Profil';
-          img.src = user.avatar;
+          img.src = sanitizeUrl(user.avatar);
           btn.appendChild(img);
         } else {
           const span = document.createElement('span');
@@ -1167,7 +1162,7 @@ const UI = {
           <li><a href="cart.html">Savat</a></li>
           <li><a href="profile.html?tab=wishlist">Sevimlilarim</a></li>
           <li><a href="profile.html?tab=orders">Buyurtmalarim</a></li>
-          <li><a href="profile.html">Profil (${user.name || 'Foydalanuvchi'})</a></li>
+          <li><a href="profile.html">Profil (${escapeHtml(user.name || 'Foydalanuvchi')})</a></li>
           <li><a href="#" id="mobLogoutLink" style="color:var(--danger, #ef4444);font-weight:600;"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-right:6px;"></i> Chiqish</a></li>
         `;
         document.getElementById('mobLogoutLink')?.addEventListener('click', (e) => {
@@ -1969,12 +1964,6 @@ const Search = {
     let timer;
     let selectedIndex = -1;
 
-    const highlightMatch = (text, query) => {
-      if (!query) return text || '';
-      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return (text || '').replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
-    };
-
     const updateSelection = (items) => {
       items.forEach((item, idx) => {
         if (idx === selectedIndex) {
@@ -2001,14 +1990,14 @@ const Search = {
             <div class="search-suggestions__list">
               ${results.map(p => `
                 <a href="book_detail.html?id=${p.id}" class="search-suggestions__item" data-id="${p.id}" style="display:flex;gap:12px;padding:10px 14px;align-items:center;text-decoration:none;color:inherit;border-radius:8px;margin:2px 4px;transition:background 0.15s ease;">
-                  <img src="${p.image}" alt="" style="width:40px;height:52px;object-fit:cover;border-radius:4px 8px 8px 4px;box-shadow:-2px 4px 10px rgba(0,0,0,0.18);flex-shrink:0;">
+                  <img src="${sanitizeUrl(p.image)}" alt="" style="width:40px;height:52px;object-fit:cover;border-radius:4px 8px 8px 4px;box-shadow:-2px 4px 10px rgba(0,0,0,0.18);flex-shrink:0;">
                   <div style="flex:1;min-width:0;">
                     <p style="font-weight:600;font-size:14px;line-height:1.3;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                       ${highlightMatch(p.name, val)}
                     </p>
                     <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-500);margin-top:2px;">
                       <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${highlightMatch(p.author, val)}</span>
-                      <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg-hover, rgba(0,0,0,0.05));color:var(--gray-500);">${p.categoryName}</span>
+                      <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:var(--bg-hover, rgba(0,0,0,0.05));color:var(--gray-500);">${escapeHtml(p.categoryName)}</span>
                     </div>
                     <div style="font-size:13px;font-weight:700;color:var(--primary);margin-top:2px;">
                       ${UI.formatPrice(p.price)}
@@ -2168,18 +2157,24 @@ function renderProductCard(product, mode = 'grid') {
   if (product.badge === 'new') badgeHtml += '<span class="badge badge-new">Yangi</span>';
   if (product.badge === 'bestseller') badgeHtml += '<span class="badge badge-bestseller">Bestseller</span>';
 
+  const safeName = escapeHtml(product.name);
+  const safeAuthor = escapeHtml(product.author);
+  const safeCat = escapeHtml(product.categoryName);
+  const safeImg = sanitizeUrl(product.image);
+  const safeImg2 = sanitizeUrl(product.image2 || product.image);
+
   return `<div class="product-card${listCls}${product.inStock ? '' : ' is-out'}" data-href="book_detail.html?id=${product.id}" role="link" tabindex="0">
-    <a href="book_detail.html?id=${product.id}" class="product-card__image-wrap" aria-label="${product.name}">
-      <img class="product-card__image product-card__image--primary" src="${product.image}" alt="${product.name}" loading="lazy" draggable="false">
-      <img class="product-card__image product-card__image--hover" src="${product.image2 || product.image}" alt="" loading="lazy" draggable="false">
+    <a href="book_detail.html?id=${product.id}" class="product-card__image-wrap" aria-label="${safeName}">
+      <img class="product-card__image product-card__image--primary" src="${safeImg}" alt="${safeName}" loading="lazy" draggable="false">
+      <img class="product-card__image product-card__image--hover" src="${safeImg2}" alt="" loading="lazy" draggable="false">
       ${outOverlay}
       <div class="product-card__badges">${badgeHtml}</div>
       <button type="button" class="product-card__wishlist${inWL ? ' active' : ''}" data-id="${product.id}" title="Sevimlilarga">${inWL ? ICONS.heartFilled : ICONS.heart}</button>
     </a>
     <div class="product-card__body">
-      <div class="product-card__category">${product.categoryName}</div>
-      <a href="book_detail.html?id=${product.id}" class="product-card__title">${product.name}</a>
-      <p class="product-card__author">${product.author}</p>
+      <div class="product-card__category">${safeCat}</div>
+      <a href="book_detail.html?id=${product.id}" class="product-card__title">${safeName}</a>
+      <p class="product-card__author">${safeAuthor}</p>
       <div class="product-card__rating"><span class="stars">${renderStars(product.rating)}</span>${product.reviewCount ? ` <span>(${product.reviewCount})</span>` : ''}</div>
       <div class="product-card__price">
         <span class="product-card__price-current">${UI.formatPrice(product.price)}</span>
@@ -2208,11 +2203,11 @@ const Slider = {
 
     slidesEl.innerHTML = BANNERS.map(b => `
       <div class="hero__slide">
-        <img src="${b.image}" alt="${b.title}">
+        <img src="${sanitizeUrl(b.image)}" alt="${escapeHtml(b.title)}">
         <div class="hero__content">
-          <h2>${b.title}</h2>
-          <p>${b.subtitle}</p>
-          <a href="${b.link}" class="btn btn-primary">${b.buttonText}</a>
+          <h2>${escapeHtml(b.title)}</h2>
+          <p>${escapeHtml(b.subtitle)}</p>
+          <a href="${sanitizeUrl(b.link)}" class="btn btn-primary">${escapeHtml(b.buttonText)}</a>
         </div>
       </div>`).join('');
 
@@ -2364,13 +2359,13 @@ const ProductDetail = {
     const variantsHtml = covers.length > 1 ? `
       <div class="variant-selector">
         <div class="variant-selector__title">Muqova turi:</div>
-        <div class="variant-options">${covers.map((v, i) => `<button type="button" class="variant-option${i === 0 ? ' selected' : ''}" data-variant="${v}">${v}</button>`).join('')}</div>
-      </div>` : covers.length === 1 ? `<p class="product-info__cover-type">Muqova: ${covers[0]}</p>` : '';
+        <div class="variant-options">${covers.map((v, i) => `<button type="button" class="variant-option${i === 0 ? ' selected' : ''}" data-variant="${escapeHtml(v)}">${escapeHtml(v)}</button>`).join('')}</div>
+      </div>` : covers.length === 1 ? `<p class="product-info__cover-type">Muqova: ${escapeHtml(covers[0])}</p>` : '';
 
     infoEl.innerHTML = `
-      <div class="product-info__category" style="color:var(--gray-400);font-size:13px;text-transform:uppercase">${p.categoryName}</div>
-      <h1 class="product-info__title">${p.name}</h1>
-      <p style="color:var(--gray-500);margin:4px 0 12px">${p.author}</p>
+      <div class="product-info__category" style="color:var(--gray-400);font-size:13px;text-transform:uppercase">${escapeHtml(p.categoryName)}</div>
+      <h1 class="product-info__title">${escapeHtml(p.name)}</h1>
+      <p style="color:var(--gray-500);margin:4px 0 12px">${escapeHtml(p.author)}</p>
       <div class="product-info__rating" style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
         <span style="color:var(--accent);font-size:18px;display:flex;">${renderStars(p.rating)}</span>
         <span style="color:var(--gray-400)">${p.rating}</span>
@@ -2403,7 +2398,7 @@ const ProductDetail = {
       <div class="product-meta-row">
         <button type="button" class="link-btn" id="shareProduct">${ICONS.arrowRight} Ulashish</button>
         <button type="button" class="link-btn${Store.isInWishlist(p.id) ? ' active' : ''}" id="wishDetail">${Store.isInWishlist(p.id) ? ICONS.heartFilled : ICONS.heart} Sevimlilarga</button>
-        <a class="link-btn" href="store.html?id=${p.storeId || 1}">${ICONS.store} Sotuvchi</a>
+        <a class="link-btn" href="store.html?id=${encodeURIComponent(p.storeId || 1)}">${ICONS.store} Sotuvchi</a>
       </div>`;
 
     // Variant selection
@@ -2461,8 +2456,8 @@ const ProductDetail = {
     bar.id = 'stickyAtc';
     bar.className = 'sticky-atc';
     bar.innerHTML = `<div class="sticky-atc__inner">
-      <img src="${p.image}" alt="">
-      <div><strong>${p.name}</strong><span>${UI.formatPrice(p.price)}</span></div>
+      <img src="${sanitizeUrl(p.image)}" alt="">
+      <div><strong>${escapeHtml(p.name)}</strong><span>${UI.formatPrice(p.price)}</span></div>
       <button type="button" class="btn btn-primary btn-sm" id="stickyAdd"${p.inStock ? '' : ' disabled'}>Savatga</button>
     </div>`;
     document.body.appendChild(bar);
@@ -2520,11 +2515,11 @@ const ProductDetail = {
     // Populate description & features & reviews
     const p = this.product;
     const descPanel = document.getElementById('tab-description');
-    if (descPanel) descPanel.innerHTML = `<div style="max-width:800px;line-height:1.8">${p.description}</div>`;
+    if (descPanel) descPanel.innerHTML = `<div style="max-width:800px;line-height:1.8">${escapeHtml(p.description)}</div>`;
     const featPanel = document.getElementById('tab-features');
     if (featPanel && p.features) {
       featPanel.innerHTML = `<table style="width:100%;max-width:600px;border-collapse:collapse">${p.features.map(f =>
-        `<tr style="border-bottom:1px solid var(--gray-100)"><td style="padding:12px 16px;font-weight:600;color:var(--gray-600);width:40%">${f.label}</td><td style="padding:12px 16px">${f.value}</td></tr>`
+        `<tr style="border-bottom:1px solid var(--gray-100)"><td style="padding:12px 16px;font-weight:600;color:var(--gray-600);width:40%">${escapeHtml(f.label)}</td><td style="padding:12px 16px">${escapeHtml(f.value)}</td></tr>`
       ).join('')}</table>`;
     }
     const revPanel = document.getElementById('tab-reviews');
@@ -2713,10 +2708,10 @@ const CartPage = {
         const p = PRODUCTS.find(pr => pr.id === ci.productId);
         if (!p) return '';
         return `<div class="cart-item" data-id="${p.id}">
-          <img class="cart-item__image" src="${p.image}" alt="${p.name}">
+          <img class="cart-item__image" src="${sanitizeUrl(p.image)}" alt="${escapeHtml(p.name)}">
           <div class="cart-item__info">
-            <a href="book_detail.html?id=${p.id}" class="cart-item__name">${p.name}</a>
-            <p class="cart-item__variant">${p.author}${ci.variant ? ' • ' + ci.variant : ''}</p>
+            <a href="book_detail.html?id=${p.id}" class="cart-item__name">${escapeHtml(p.name)}</a>
+            <p class="cart-item__variant">${escapeHtml(p.author)}${ci.variant ? ' • ' + escapeHtml(ci.variant) : ''}</p>
           </div>
           <div class="cart-item__price">${UI.formatPrice(p.price)}</div>
           <div class="quantity-selector cart-item__qty">
@@ -2907,12 +2902,12 @@ const Checkout = {
     el.innerHTML = addrs.map(a => {
       const on = this.orderData.address?.id === a.id;
       return `<label class="choice-card${on ? ' selected' : ''}">
-        <input type="radio" name="checkoutAddress" value="${a.id}" ${on ? 'checked' : ''}>
+        <input type="radio" name="checkoutAddress" value="${escapeHtml(a.id)}" ${on ? 'checked' : ''}>
         <span class="choice-card__mark">${ICONS.check}</span>
         <div class="choice-card__body">
-          <strong>${a.name}</strong>
-          <p>${a.phone}</p>
-          <p>${a.city}, ${a.address}</p>
+          <strong>${escapeHtml(a.name)}</strong>
+          <p>${escapeHtml(a.phone)}</p>
+          <p>${escapeHtml(a.city)}, ${escapeHtml(a.address)}</p>
         </div>
       </label>`;
     }).join('');
@@ -2987,7 +2982,7 @@ const Checkout = {
     if (itemsEl) {
       itemsEl.innerHTML = Store.getCart().map(ci => {
         const p = PRODUCTS.find(pr => pr.id === ci.productId); if (!p) return '';
-        return `<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-100)"><img src="${p.image}" style="width:48px;height:60px;object-fit:cover;border-radius:6px"><div><p style="font-size:13px;font-weight:600">${p.name}</p><p style="font-size:12px;color:var(--gray-400)">${ci.qty} × ${UI.formatPrice(p.price)}</p></div></div>`;
+        return `<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-100)"><img src="${sanitizeUrl(p.image)}" style="width:48px;height:60px;object-fit:cover;border-radius:6px"><div><p style="font-size:13px;font-weight:600">${escapeHtml(p.name)}</p><p style="font-size:12px;color:var(--gray-400)">${ci.qty} × ${UI.formatPrice(p.price)}</p></div></div>`;
       }).join('');
     }
   },
@@ -2999,9 +2994,9 @@ const Checkout = {
     const pm = this.orderData.payment;
     el.innerHTML = `
       <div style="display:grid;gap:16px">
-        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-md)"><h4 style="display:flex;align-items:center;gap:8px;">${ICONS.mapPin} Manzil</h4><p style="margin-top:4px">${a?.name}, ${a?.phone}<br>${a?.city}, ${a?.address}</p></div>
-        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-md)"><h4 style="display:flex;align-items:center;gap:8px;">${ICONS.truck} Yetkazib berish</h4><p style="margin-top:4px">${d?.name} — ${d?.price ? UI.formatPrice(d.price) : 'Bepul'} (${d?.days})</p></div>
-        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-md)"><h4 style="display:flex;align-items:center;gap:8px;">${ICONS.creditCard} To'lov usuli</h4><p style="margin-top:4px;display:flex;align-items:center;gap:8px;">${mapPaymentIcon(pm?.icon)} ${pm?.name}</p></div>
+        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-md)"><h4 style="display:flex;align-items:center;gap:8px;">${ICONS.mapPin} Manzil</h4><p style="margin-top:4px">${escapeHtml(a?.name)}, ${escapeHtml(a?.phone)}<br>${escapeHtml(a?.city)}, ${escapeHtml(a?.address)}</p></div>
+        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-md)"><h4 style="display:flex;align-items:center;gap:8px;">${ICONS.truck} Yetkazib berish</h4><p style="margin-top:4px">${escapeHtml(d?.name)} — ${d?.price ? UI.formatPrice(d.price) : 'Bepul'} (${escapeHtml(d?.days)})</p></div>
+        <div style="padding:16px;background:var(--gray-50);border-radius:var(--radius-md)"><h4 style="display:flex;align-items:center;gap:8px;">${ICONS.creditCard} To'lov usuli</h4><p style="margin-top:4px;display:flex;align-items:center;gap:8px;">${mapPaymentIcon(pm?.icon)} ${escapeHtml(pm?.name)}</p></div>
       </div>`;
   },
   placeOrder() {
@@ -3059,10 +3054,10 @@ const Auth = {
     container.innerHTML = `
       <div class="card card--logged-in" style="width:100%;text-align:center;padding:40px 28px;box-sizing:border-box;">
         <div style="margin-bottom:18px;">
-          ${user.avatar ? `<img src="${user.avatar}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">${UI.initials(user)}</div>`}
+          ${user.avatar ? `<img src="${sanitizeUrl(user.avatar)}" alt="" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto;box-shadow:var(--neu-shadow-convex-sm);">${UI.initials(user)}</div>`}
         </div>
-        <h2 style="font-size:24px;font-weight:700;color:var(--neu-text-title);margin:0 0 6px;">${user.name}</h2>
-        <p style="font-size:14px;color:var(--neu-text-sub);margin:0 0 16px;">${user.email}</p>
+        <h2 style="font-size:24px;font-weight:700;color:var(--neu-text-title);margin:0 0 6px;">${escapeHtml(user.name)}</h2>
+        <p style="font-size:14px;color:var(--neu-text-sub);margin:0 0 16px;">${escapeHtml(user.email)}</p>
         <div style="display:inline-block;padding:5px 16px;border-radius:20px;background:rgba(15,23,42,0.08);color:var(--text-primary);font-size:12px;font-weight:700;margin-bottom:28px;">
           ✓ Siz allaqachon tizimga kirgansiz
         </div>
@@ -3556,7 +3551,7 @@ const ProfilePage = {
     }
     el.innerHTML = addrs.map(a => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:12px;flex-wrap:wrap;gap:12px;">
-        <div><strong>${a.city || ''}</strong><p style="color:var(--text-muted);font-size:14px;margin:2px 0 0;">${a.address || ''} ${a.name ? '— ' + a.name : ''}</p></div>
+        <div><strong>${escapeHtml(a.city || '')}</strong><p style="color:var(--text-muted);font-size:14px;margin:2px 0 0;">${escapeHtml(a.address || '')} ${a.name ? '— ' + escapeHtml(a.name) : ''}</p></div>
         <div style="display:flex;align-items:center;">
           ${createBinButtonHtml("O'chirish", "danger", "addrDel_" + a.id)}
         </div>
@@ -3594,20 +3589,20 @@ const ProfilePage = {
     };
     listEl.innerHTML = orders.map(o => {
       const st = statusMap[o.status] || statusMap.processing;
-      const pay = o.payment?.name || '—';
-      const addr = o.address ? `${o.address.city}, ${o.address.address}` : '—';
+      const pay = escapeHtml(o.payment?.name || '—');
+      const addr = o.address ? `${escapeHtml(o.address.city)}, ${escapeHtml(o.address.address)}` : '—';
       const items = (o.items || []).map(i => `
         <div class="order-card__line">
-          <img src="${i.image || ''}" alt="">
+          <img src="${sanitizeUrl(i.image || '')}" alt="">
           <div>
-            <strong>${i.name || 'Kitob'}</strong>
+            <strong>${escapeHtml(i.name || 'Kitob')}</strong>
             <p>${i.qty} × ${UI.formatPrice(i.price || 0)}</p>
           </div>
         </div>`).join('');
       return `<article class="order-card" style="margin-bottom:16px;">
         <div class="order-card__header">
-          <div><strong class="order-card__id">${o.id}</strong><span class="order-card__date">${UI.formatDate(o.date)}</span></div>
-          <span class="order-status ${st.cls}">${st.label}</span>
+          <div><strong class="order-card__id">${escapeHtml(o.id)}</strong><span class="order-card__date">${escapeHtml(UI.formatDate(o.date))}</span></div>
+          <span class="order-status ${st.cls}">${escapeHtml(st.label)}</span>
         </div>
         <div class="order-card__body">${items}</div>
         <div class="order-card__meta">
@@ -3617,8 +3612,8 @@ const ProfilePage = {
         <div class="order-card__footer">
           <strong>${UI.formatPrice(o.total)}</strong>
           <div class="order-card__actions">
-            <button type="button" class="btn btn-secondary btn-sm order-repeat" data-id="${o.id}">Qayta buyurtma</button>
-            ${o.status === 'processing' ? `<button type="button" class="btn btn-sm order-cancel" data-id="${o.id}">Bekor qilish</button>` : ''}
+            <button type="button" class="btn btn-secondary btn-sm order-repeat" data-id="${escapeHtml(o.id)}">Qayta buyurtma</button>
+            ${o.status === 'processing' ? `<button type="button" class="btn btn-sm order-cancel" data-id="${escapeHtml(o.id)}">Bekor qilish</button>` : ''}
           </div>
         </div>
       </article>`;
@@ -3683,20 +3678,20 @@ const OrdersPage = {
     };
     listEl.innerHTML = orders.map(o => {
       const st = statusMap[o.status] || statusMap.processing;
-      const pay = o.payment?.name || '—';
-      const addr = o.address ? `${o.address.city}, ${o.address.address}` : '—';
+      const pay = escapeHtml(o.payment?.name || '—');
+      const addr = o.address ? `${escapeHtml(o.address.city)}, ${escapeHtml(o.address.address)}` : '—';
       const items = (o.items || []).map(i => `
         <div class="order-card__line">
-          <img src="${i.image || ''}" alt="">
+          <img src="${sanitizeUrl(i.image || '')}" alt="">
           <div>
-            <strong>${i.name || 'Kitob'}</strong>
+            <strong>${escapeHtml(i.name || 'Kitob')}</strong>
             <p>${i.qty} × ${UI.formatPrice(i.price || 0)}</p>
           </div>
         </div>`).join('');
       return `<article class="order-card">
         <div class="order-card__header">
-          <div><strong class="order-card__id">${o.id}</strong><span class="order-card__date">${UI.formatDate(o.date)}</span></div>
-          <span class="order-status ${st.cls}">${st.label}</span>
+          <div><strong class="order-card__id">${escapeHtml(o.id)}</strong><span class="order-card__date">${escapeHtml(UI.formatDate(o.date))}</span></div>
+          <span class="order-status ${st.cls}">${escapeHtml(st.label)}</span>
         </div>
         <div class="order-card__body">${items}</div>
         <div class="order-card__meta">
@@ -3706,8 +3701,8 @@ const OrdersPage = {
         <div class="order-card__footer">
           <strong>${UI.formatPrice(o.total)}</strong>
           <div class="order-card__actions">
-            <button type="button" class="btn btn-secondary btn-sm order-repeat" data-id="${o.id}">Qayta buyurtma</button>
-            ${o.status === 'processing' ? `<button type="button" class="btn btn-sm order-cancel" data-id="${o.id}">Bekor qilish</button>` : ''}
+            <button type="button" class="btn btn-secondary btn-sm order-repeat" data-id="${escapeHtml(o.id)}">Qayta buyurtma</button>
+            ${o.status === 'processing' ? `<button type="button" class="btn btn-sm order-cancel" data-id="${escapeHtml(o.id)}">Bekor qilish</button>` : ''}
           </div>
         </div>
       </article>`;
@@ -4022,8 +4017,8 @@ function initHeader() {
       if (userContent) {
         userContent.innerHTML = user
           ? `<div class="user-dropdown__head">
-               ${user.avatar ? `<img class="dropdown-avatar" src="${user.avatar}" alt="">` : `<span class="dropdown-avatar dropdown-avatar--initials">${UI.initials(user)}</span>`}
-               <div><strong>${user.name || ''}</strong><p>${user.email || ''}</p></div>
+               ${user.avatar ? `<img class="dropdown-avatar" src="${sanitizeUrl(user.avatar)}" alt="">` : `<span class="dropdown-avatar dropdown-avatar--initials">${UI.initials(user)}</span>`}
+               <div><strong>${escapeHtml(user.name || '')}</strong><p>${escapeHtml(user.email || '')}</p></div>
              </div>
              <a href="profile.html">${ICONS.user} Profil</a>
              <a href="profile.html?tab=orders">${ICONS.orders} Buyurtmalarim</a>
@@ -4076,8 +4071,8 @@ function initHeader() {
       if (!catDD.innerHTML.trim()) {
         catDD.innerHTML = `<div class="cats-mega">${CATEGORIES.map(c =>
           `<a href="book_list.html?cat=${c.id}" class="cats-mega__item">
-            <img src="${c.image}" alt="${c.name}">
-            <div><strong>${c.name}</strong><p>${c.count} ta kitob</p></div>
+            <img src="${sanitizeUrl(c.image)}" alt="${escapeHtml(c.name)}">
+            <div><strong>${escapeHtml(c.name)}</strong><p>${c.count} ta kitob</p></div>
           </a>`).join('')}</div>`;
       }
       const willBeActive = !catDD.classList.contains('active');
@@ -4178,8 +4173,8 @@ function initHomePage() {
   if (catRow && typeof CATEGORIES !== 'undefined') {
     catRow.innerHTML = CATEGORIES.map(c =>
       `<a href="book_list.html?cat=${c.id}" class="category-card">
-        <div class="category-card__thumb"><img src="${c.image}" alt="${c.name}"></div>
-        <div class="category-card__name">${c.name}</div>
+        <div class="category-card__thumb"><img src="${sanitizeUrl(c.image)}" alt="${escapeHtml(c.name)}"></div>
+        <div class="category-card__name">${escapeHtml(c.name)}</div>
       </a>`).join('');
   }
   // Discount products
@@ -4196,9 +4191,9 @@ function initHomePage() {
   if (brandsEl) {
     const list = (typeof BRANDS !== 'undefined' && Array.isArray(BRANDS) && BRANDS.length) ? BRANDS : BRAND_PARTNERS;
     brandsEl.innerHTML = list.map(b =>
-      `<a class="publisher-item" href="store.html?id=${b.id || 1}" title="${b.name}">
-        <span class="publisher-item__icon">${b.vector || `<img src="${b.logo || ''}" alt="${b.name}" draggable="false">`}</span>
-        <span class="publisher-item__name">${b.name}</span>
+      `<a class="publisher-item" href="store.html?id=${encodeURIComponent(b.id || 1)}" title="${escapeHtml(b.name)}">
+        <span class="publisher-item__icon">${b.vector || `<img src="${sanitizeUrl(b.logo || '')}" alt="${escapeHtml(b.name)}" draggable="false">`}</span>
+        <span class="publisher-item__name">${escapeHtml(b.name)}</span>
       </a>`).join('');
   }
   const newEl = document.getElementById('newProducts');
@@ -4207,11 +4202,11 @@ function initHomePage() {
   if (blogEl && typeof POSTS !== 'undefined') {
     blogEl.innerHTML = POSTS.map(post =>
       `<article class="blog-card" data-href="info.html?page=blog&id=${post.id}" role="link" tabindex="0">
-        <div class="blog-card__image"><img src="${post.image}" alt="${post.title}"></div>
+        <div class="blog-card__image"><img src="${sanitizeUrl(post.image)}" alt="${escapeHtml(post.title)}"></div>
         <div class="blog-card__body">
           <time>${UI.formatDate(post.date)}</time>
-          <h3>${post.title}</h3>
-          <p>${post.excerpt}</p>
+          <h3>${escapeHtml(post.title)}</h3>
+          <p>${escapeHtml(post.excerpt)}</p>
         </div>
       </article>`).join('');
   }
@@ -4328,7 +4323,7 @@ function initCatalogPage() {
     catsEl.innerHTML = CATEGORIES.map(c => `
       <label class="filter-checkbox">
         <input type="checkbox" data-cat="${c.id}"${c.id === catId ? ' checked' : ''}>
-        ${c.name} <span class="count">${c.count}</span>
+        ${escapeHtml(c.name)} <span class="count">${c.count}</span>
       </label>`).join('');
   }
 
@@ -4446,9 +4441,9 @@ function initCategoriesPage() {
   if (!grid || typeof CATEGORIES === 'undefined') return;
   grid.innerHTML = CATEGORIES.map(c => `
     <a href="book_list.html?cat=${c.id}" class="category-page-card">
-      <div class="category-page-card__image"><img src="${c.image}" alt="${c.name}" draggable="false"></div>
+      <div class="category-page-card__image"><img src="${sanitizeUrl(c.image)}" alt="${escapeHtml(c.name)}" draggable="false"></div>
       <div class="category-page-card__body">
-        <h3>${c.name}</h3>
+        <h3>${escapeHtml(c.name)}</h3>
         <p>${c.count} ta kitob</p>
       </div>
     </a>`).join('');
@@ -4659,7 +4654,7 @@ function enhanceChrome() {
     const ul = catTitle.parentElement.querySelector('.footer__links');
     if (ul) {
       ul.innerHTML = CATEGORIES.slice(0, 5).map(c =>
-        `<li><a href="book_list.html?cat=${c.id}">${c.name}</a></li>`
+        `<li><a href="book_list.html?cat=${c.id}">${escapeHtml(c.name)}</a></li>`
       ).join('');
     }
   }

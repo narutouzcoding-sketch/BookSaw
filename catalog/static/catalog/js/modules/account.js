@@ -376,7 +376,7 @@ const ProfilePage = {
     const has = !!(user && user.avatar);
     if (preview) preview.classList.toggle('has-photo', has);
     if (img) {
-      if (has) img.src = user.avatar;
+      if (has) img.src = sanitizeUrl(user.avatar);
       else img.removeAttribute('src');
     }
     if (removeBtn) removeBtn.hidden = !has;

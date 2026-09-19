@@ -65,6 +65,8 @@
     </div>
   `;
 
+  const escapeHtml = str => String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
   function getUser() {
     try {
       const u = localStorage.getItem('booksaw_user') || localStorage.getItem('marketplace_user');
@@ -80,7 +82,7 @@
          <li><a href="cart.html">Savat</a></li>
          <li><a href="profile.html?tab=wishlist">Sevimlilarim</a></li>
          <li><a href="profile.html?tab=orders">Buyurtmalarim</a></li>
-         <li><a href="profile.html">Profil (${user.name || 'Foydalanuvchi'})</a></li>
+         <li><a href="profile.html">Profil (${escapeHtml(user.name || 'Foydalanuvchi')})</a></li>
          <li><a href="#" id="sharedMobLogout" style="color:#ef4444;font-weight:600;">Chiqish</a></li>`
       : `<li><a href="book_list.html">Bosh sahifa</a></li>
          <li><a href="categories.html">Kategoriyalar</a></li>

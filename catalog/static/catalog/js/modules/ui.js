@@ -179,7 +179,8 @@ const UI = {
     const icon = type === 'success' ? ICONS.check : type === 'error' ? ICONS.x : ICONS.info;
     const t = document.createElement('div');
     t.className = `toast toast--${type}`;
-    t.innerHTML = `<div class="toast__icon" aria-hidden="true">${icon}</div><div class="toast__message">${message}</div><button class="toast__close" type="button" aria-label="Xabarni yopish" onclick="this.parentElement.remove()">${ICONS.x}</button>`;
+    t.innerHTML = `<div class="toast__icon" aria-hidden="true">${icon}</div><div class="toast__message">${message}</div><button class="toast__close" type="button" aria-label="Xabarni yopish">${ICONS.x}</button>`;
+    t.querySelector('.toast__close')?.addEventListener('click', () => t.remove());
     c.appendChild(t);
     requestAnimationFrame(() => t.classList.add('show'));
     setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, duration);

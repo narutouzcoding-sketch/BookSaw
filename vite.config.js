@@ -18,6 +18,8 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    setupFiles: ['./tests/setup.js']
+    setupFiles: ['./tests/setup.js'],
+    include: ['tests/**/*.test.js'],
+    exclude: ['**/node_modules/**', '**/dist/**', 'tests/e2e/**']
   }
 });

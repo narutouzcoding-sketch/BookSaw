@@ -1108,8 +1108,97 @@ if (typeof window !== 'undefined') {
     UI.updateHeaderAvatar();
     UI.updateBadges();
   });
+}
 
-  // Orqaga moslik uchun window ga biriktirish
+const Animations = {
+  flyToCart(origin) {
+    if (!origin || typeof document === 'undefined') return;
+    const cartIcon = document.getElementById('cartToggle') || document.getElementById('cartBadge');
+    if (!cartIcon) return;
+    const imgEl = origin.tagName === 'IMG'
+      ? origin
+      : origin.closest('.product-card, .product-detail, .quick-view__layout, .gallery, .sticky-atc')?.querySelector('img');
+    const startEl = imgEl || origin;
+    const start = startEl.getBoundingClientRect();
+    const end = cartIcon.getBoundingClientRect();
+    const clone = document.createElement('img');
+    clone.className = 'fly-clone';
+    clone.src = imgEl?.src || '';
+    clone.alt = '';
+    Object.assign(clone.style, {
+      top: start.top + 'px',
+      left: start.left + 'px',
+      width: Math.max(28, start.width) + 'px',
+      height: Math.max(28, start.height) + 'px'
+    });
+    if (!imgEl) {
+      clone.remove();
+      const dot = document.createElement('div');
+      dot.className = 'fly-clone';
+      Object.assign(dot.style, {
+        top: start.top + 'px', left: start.left + 'px', width: '28px', height: '28px',
+        background: 'var(--primary)', borderRadius: '50%'
+      });
+      document.body.appendChild(dot);
+      requestAnimationFrame(() => {
+        Object.assign(dot.style, {
+          top: end.top + end.height / 2 - 10 + 'px',
+          left: end.left + end.width / 2 - 10 + 'px',
+          width: '20px', height: '20px', opacity: '0.3'
+        });
+      });
+      setTimeout(() => { dot.remove(); this.bumpCart(cartIcon); }, 600);
+      return;
+    }
+    document.body.appendChild(clone);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        Object.assign(clone.style, {
+          top: (end.top + end.height / 2 - 10) + 'px',
+          left: (end.left + end.width / 2 - 10) + 'px',
+          width: '20px',
+          height: '20px',
+          opacity: '0.35',
+          borderRadius: '50%'
+        });
+      });
+    });
+    setTimeout(() => { clone.remove(); this.bumpCart(cartIcon); }, 620);
+  },
+  bumpCart(el) {
+    if (!el) return;
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+    setTimeout(() => el.classList.remove('bump'), 300);
+  },
+  initScrollReveal() {
+    if (typeof document === 'undefined') return;
+    const els = document.querySelectorAll('.fade-in-up:not(.visible)');
+    if (!els.length) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) { els.forEach(el => el.classList.add('visible')); return; }
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); obs.unobserve(entry.target); } });
+    }, { threshold: 0.05, rootMargin: '40px 0px 0px 0px' });
+    els.forEach(el => obs.observe(el));
+    setTimeout(() => {
+      document.querySelectorAll('.fade-in-up:not(.visible)').forEach(el => el.classList.add('visible'));
+    }, 1200);
+  },
+  countUp(el, target, duration = 1000) {
+    let start = 0;
+    const step = ts => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      el.textContent = UI.formatPrice(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+};
+
+// Orqaga moslik uchun window ga biriktirish
+if (typeof window !== 'undefined') {
   window.UI = UI;
   window.runBinEatAnimation = runBinEatAnimation;
   window.createBinButtonHtml = createBinButtonHtml;
@@ -1117,10 +1206,12 @@ if (typeof window !== 'undefined') {
   window.renderStars = renderStars;
   window.mapDeliveryIcon = mapDeliveryIcon;
   window.mapPaymentIcon = mapPaymentIcon;
+  window.Animations = Animations;
 }
 
 export {
   UI,
+  Animations,
   runBinEatAnimation,
   requireAuth,
   createBinButtonHtml,

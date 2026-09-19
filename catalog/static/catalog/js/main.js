@@ -4781,16 +4781,16 @@ function enableDragScroll(el) {
     lastX = e.clientX;
     lastTime = performance.now();
     velocity = 0;
-    try { el.setPointerCapture(e.pointerId); } catch {}
   });
 
   el.addEventListener('pointermove', (e) => {
     if (!isDown) return;
     const deltaX = e.clientX - startX;
 
-    if (!hasMoved && Math.abs(deltaX) > 6) {
+    if (!hasMoved && Math.abs(deltaX) > 12) {
       hasMoved = true;
       el.classList.add('is-dragging');
+      try { el.setPointerCapture(e.pointerId); } catch {}
     }
 
     if (hasMoved) {
@@ -4813,24 +4813,29 @@ function enableDragScroll(el) {
 
     if (hasMoved) {
       beginMomentum();
-      setTimeout(() => { hasMoved = false; }, 80);
+      setTimeout(() => { hasMoved = false; }, 60);
     }
   };
 
   el.addEventListener('pointerup', onPointerUp);
   el.addEventListener('pointercancel', onPointerUp);
 
-  // Prevent link navigation if the user dragged/swiped horizontally
+  // Prevent link navigation if the user dragged/swiped horizontally,
+  // but ensure single clicks immediately open the card on 1st click!
   el.addEventListener('click', (e) => {
     if (hasMoved) {
       e.preventDefault();
       e.stopPropagation();
+      hasMoved = false;
+      return;
+    }
+    if (e.target.closest('button, input, select, label, .product-card__wishlist, .add-to-cart-btn, .quick-view-btn')) {
       return;
     }
     const card = e.target.closest('.product-card, .category-card');
-    if (card && !e.target.closest('button, .product-card__wishlist, .add-to-cart-btn, .quick-view-btn')) {
+    if (card) {
       const href = card.dataset.href || card.getAttribute('href');
-      if (href && card.tagName !== 'A') {
+      if (href) {
         window.location.href = href;
       }
     }

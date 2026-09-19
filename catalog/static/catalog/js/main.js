@@ -5031,5 +5031,17 @@ function init404Page() {
     }
   });
 }
-
 window.Booksaw = { Store, Api, UI, Search };
+window.Store = Store;
+window.UI = UI;
+window.Search = Search;
+window.Catalog = Catalog;
+window.ProductDetail = ProductDetail;
+window.CartPage = CartPage;
+window.Checkout = Checkout;
+window.Auth = Auth;
+window.ProfilePage = ProfilePage;
+window.OrdersPage = OrdersPage;
+window.WishlistPage = WishlistPage;
+window.Slider = Slider;
+window.Animations = Animations;

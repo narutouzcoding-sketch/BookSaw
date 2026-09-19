@@ -63,6 +63,9 @@ const Theme = {
     } catch { /* ignore */ }
     return 'light';
   },
+  set(theme) {
+    this.apply(theme);
+  },
   apply(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.colorScheme = theme;
@@ -249,9 +252,6 @@ const Store = {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('booksaw:cartchange', { detail: { cart } }));
     }
-    if (typeof UI !== 'undefined' && UI.updateBadges) {
-      UI.updateBadges();
-    }
   },
   addToCart(productId, qty = 1, variant = null) {
     const cart = this.getCart();
@@ -293,9 +293,6 @@ const Store = {
     this._scopedSet('marketplace_wishlist', wl);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('booksaw:wishlistchange', { detail: { wishlist: wl } }));
-    }
-    if (typeof UI !== 'undefined' && UI.updateBadges) {
-      UI.updateBadges();
     }
   },
   clearWishlist() {
@@ -614,10 +611,6 @@ const Store = {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('booksaw:authchange', { detail: { user } }));
     }
-    if (typeof UI !== 'undefined') {
-      if (UI.updateHeaderAvatar) UI.updateHeaderAvatar();
-      if (UI.updateBadges) UI.updateBadges();
-    }
     return user;
   },
 
@@ -828,6 +821,7 @@ const Store = {
 if (typeof window !== 'undefined') {
   window.ICONS = ICONS;
   window.Theme = Theme;
+  window.BooksawTheme = Theme;
   window.Store = Store;
 }
 

@@ -542,7 +542,7 @@ function enhanceChrome() {
       const email = document.getElementById('newsEmail')?.value.trim();
       if (!/\S+@\S+\.\S+/.test(email)) { UI.showToast('Emailni tekshiring', 'error'); return; }
       try {
-        await Api.newsletter(email);
+        if (window.Api) await window.Api.newsletter(email);
         UI.showToast('Obuna qilindi');
         e.target.reset();
       } catch (err) {
@@ -732,10 +732,10 @@ function initInfoPage() {
     if (post) {
       document.title = post.title + ' — Booksaw';
       el.innerHTML = `<article class="blog-article">
-        <img src="${post.image}" alt="${post.title}">
+        <img src="${sanitizeUrl(post.image)}" alt="${escapeHtml(post.title)}">
         <time>${UI.formatDate(post.date)}</time>
-        <h1>${post.title}</h1>
-        ${post.body || `<p>${post.excerpt}</p>`}
+        <h1>${escapeHtml(post.title)}</h1>
+        ${post.body || `<p>${escapeHtml(post.excerpt)}</p>`}
         <a href="info.html?page=blog" class="btn btn-secondary btn-sm">Barcha maqolalar</a>
       </article>`;
       return;
@@ -745,13 +745,13 @@ function initInfoPage() {
     document.title = 'Blog — Booksaw';
     el.innerHTML = `<h1>Blog</h1><div class="blog-grid">${POSTS.map(post => `
       <article class="blog-card" data-href="info.html?page=blog&id=${post.id}" role="link" tabindex="0">
-        <div class="blog-card__image"><img src="${post.image}" alt="${post.title}"></div>
-        <div class="blog-card__body"><time>${UI.formatDate(post.date)}</time><h3>${post.title}</h3><p>${post.excerpt}</p></div>
+        <div class="blog-card__image"><img src="${sanitizeUrl(post.image)}" alt="${escapeHtml(post.title)}"></div>
+        <div class="blog-card__body"><time>${UI.formatDate(post.date)}</time><h3>${escapeHtml(post.title)}</h3><p>${escapeHtml(post.excerpt)}</p></div>
       </article>`).join('')}</div>`;
   } else if (typeof INFO_PAGES !== 'undefined' && INFO_PAGES[key]) {
     const page = INFO_PAGES[key];
     document.title = 'Booksaw — ' + page.title;
-    el.innerHTML = '<h1>' + page.title + '</h1>' + page.body;
+    el.innerHTML = '<h1>' + escapeHtml(page.title) + '</h1>' + page.body;
     const breadcrumbEl = document.querySelector('.breadcrumbs__current, [data-info-breadcrumb]');
     if (breadcrumbEl) breadcrumbEl.textContent = page.title;
   }
@@ -770,7 +770,7 @@ function init404Page() {
     }
   });
 }
-window.Booksaw = { Store, Api, UI, Search };
+window.Booksaw = { Store, get Api() { return window.Api; }, UI, Search, Catalog, ProductDetail, CartPage, Checkout, Auth, ProfilePage, OrdersPage, WishlistPage, Slider, Animations };
 window.Store = Store;
 window.UI = UI;
 window.Search = Search;

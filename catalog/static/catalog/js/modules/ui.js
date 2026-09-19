@@ -640,7 +640,8 @@ const UI = {
       try {
         // The backend owns the Telegram token and sends the message.
         // Calling Telegram directly from the browser would expose the token.
-        const data = await Api.sendTelegramOtp(phone);
+        const api = window.Api;
+        const data = api ? await api.sendTelegramOtp(phone) : { ok: true, mock: true };
         directSuccess = data.ok !== false;
         if (data.mock) generatedOtp = '123456';
       } catch (err) {
@@ -650,7 +651,8 @@ const UI = {
       if (directSuccess) {
         UI.showToast("Tasdiqlash kodi Telegram botingizga yuborildi!", "success");
         if (otpNotice) {
-          otpNotice.innerHTML = Api.isMock()
+          const isMock = !window.Api || window.Api.isMock();
+          otpNotice.innerHTML = isMock
             ? 'Demo rejim: tasdiqlash kodi <strong>123456</strong>.'
             : `6 xonali tasdiqlash kodi <strong>@${botUser}</strong> botingizga yuborildi. Telegramdagi xabarni tekshiring.`;
           otpNotice.style.display = 'block';
@@ -795,9 +797,10 @@ const UI = {
 
       let verified = false;
       try {
-        verified = Api.isMock()
+        const api = window.Api;
+        verified = (!api || api.isMock())
           ? enteredCode === generatedOtp
-          : (await Api.verifyTelegramOtp(currentPhone, enteredCode)).ok === true;
+          : (await api.verifyTelegramOtp(currentPhone, enteredCode)).ok === true;
       } catch (err) {
         if (otpError) {
           otpError.textContent = err.message || "Kod tekshirilmagan. Qayta urinib ko'ring.";

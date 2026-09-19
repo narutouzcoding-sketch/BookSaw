@@ -135,7 +135,6 @@ test.describe('E2E Flows: User Journeys & State Synchronization', () => {
     const removeBtn = page.locator('.cart-item .cart-remove').first();
     await removeBtn.click();
     await page.locator('#confirmOk').click();
-    await page.waitForTimeout(600); // Allow removal transition
 
     // Badge should be 1
     await expect(cartBadge).toHaveText('1');
@@ -144,7 +143,6 @@ test.describe('E2E Flows: User Journeys & State Synchronization', () => {
     const clearBtn = page.locator('#clearCartEatBtn');
     if (await clearBtn.isVisible()) {
       await clearBtn.click();
-      await page.waitForTimeout(600);
     } else {
       await page.evaluate(() => window.Store.clearCart());
     }
@@ -241,7 +239,7 @@ test.describe('E2E Flows: User Journeys & State Synchronization', () => {
     await page.fill('#addrCity', 'Toshkent');
     await page.fill('#addrAddress', 'Chilonzor tumani 9-mavze 12-uy');
     await page.click('#saveAddrBtn');
-    await page.waitForTimeout(300);
+    await expect(page.locator('#addressList .choice-card').first()).toBeVisible();
 
     // Proceed to step 2
     await page.click('#toStep2');

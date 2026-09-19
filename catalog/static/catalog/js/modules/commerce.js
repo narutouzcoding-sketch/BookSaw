@@ -465,21 +465,23 @@ const CartPage = {
       const itemsHtml = cart.map(ci => {
         const p = allProducts.find(pr => pr.id === ci.productId);
         if (!p) return '';
-        return `<div class="cart-item" data-id="${p.id}">
+        const safeId = escapeHtml(p.id);
+        const encodedId = encodeURIComponent(p.id);
+        return `<div class="cart-item" data-id="${safeId}">
           <img class="cart-item__image" src="${sanitizeUrl(p.image)}" alt="${escapeHtml(p.name)}">
           <div class="cart-item__info">
-            <a href="book_detail.html?id=${p.id}" class="cart-item__name">${escapeHtml(p.name)}</a>
+            <a href="book_detail.html?id=${encodedId}" class="cart-item__name">${escapeHtml(p.name)}</a>
             <p class="cart-item__variant">${escapeHtml(p.author)}${ci.variant ? ' • ' + escapeHtml(ci.variant) : ''}</p>
           </div>
           <div class="cart-item__price">${UI.formatPrice(p.price)}</div>
           <div class="quantity-selector cart-item__qty">
-            <button type="button" class="cart-qty-btn" data-action="minus" data-id="${p.id}">${ICONS.minus}</button>
-            <span style="width:40px;text-align:center;font-weight:600">${ci.qty}</span>
-            <button type="button" class="cart-qty-btn" data-action="plus" data-id="${p.id}">${ICONS.plus}</button>
+            <button type="button" class="cart-qty-btn" data-action="minus" data-id="${safeId}">${ICONS.minus}</button>
+            <span style="width:40px;text-align:center;font-weight:600">${Number(ci.qty)}</span>
+            <button type="button" class="cart-qty-btn" data-action="plus" data-id="${safeId}">${ICONS.plus}</button>
           </div>
           <div class="cart-item__actions">
-            <button type="button" class="btn-icon cart-move-wl" data-id="${p.id}" title="Sevimlilarga">${ICONS.heart}</button>
-            <button type="button" class="btn-icon cart-remove" data-id="${p.id}" title="O'chirish" style="color:var(--danger)">${ICONS.trash}</button>
+            <button type="button" class="btn-icon cart-move-wl" data-id="${safeId}" title="Sevimlilarga">${ICONS.heart}</button>
+            <button type="button" class="btn-icon cart-remove" data-id="${safeId}" title="O'chirish" style="color:var(--danger)">${ICONS.trash}</button>
           </div>
         </div>`;
       }).join('');
@@ -698,7 +700,7 @@ const Checkout = {
     el.innerHTML = options.map(d => {
       const on = this.orderData.delivery?.id === d.id;
       return `<label class="choice-card${on ? ' selected' : ''}">
-        <input type="radio" name="checkoutDelivery" value="${d.id}" ${on ? 'checked' : ''}>
+        <input type="radio" name="checkoutDelivery" value="${escapeHtml(d.id)}" ${on ? 'checked' : ''}>
         <span class="choice-card__mark">${ICONS.check}</span>
         <div class="choice-card__body">
           <strong>${escapeHtml(d.name)}</strong>
@@ -709,7 +711,7 @@ const Checkout = {
     }).join('');
     el.querySelectorAll('input[name="checkoutDelivery"]').forEach(inp => {
       inp.addEventListener('change', () => {
-        const d = options.find(opt => opt.id === +inp.value);
+        const d = options.find(opt => String(opt.id) === String(inp.value));
         if (d) { this.orderData.delivery = d; this.orderData.deliveryCost = d.price; this.renderDelivery(); this.renderSummary(); }
       });
     });
@@ -723,7 +725,7 @@ const Checkout = {
     el.innerHTML = methods.map(pm => {
       const on = this.orderData.payment?.id === pm.id;
       return `<label class="choice-card${on ? ' selected' : ''}">
-        <input type="radio" name="checkoutPayment" value="${pm.id}" ${on ? 'checked' : ''}>
+        <input type="radio" name="checkoutPayment" value="${escapeHtml(pm.id)}" ${on ? 'checked' : ''}>
         <span class="choice-card__mark">${ICONS.check}</span>
         <div class="choice-card__body">
           <strong>${escapeHtml(pm.name)}</strong>
@@ -733,11 +735,8 @@ const Checkout = {
     }).join('');
     el.querySelectorAll('input[name="checkoutPayment"]').forEach(inp => {
       inp.addEventListener('change', () => {
-        const pm = methods.find(m => m.id === +inp.value);
-        if (pm) {
-          this.orderData.payment = pm;
-          this.renderPayment();
-        }
+        const pm = methods.find(m => String(m.id) === String(inp.value));
+        if (pm) { this.orderData.payment = pm; this.renderPayment(); this.renderSummary(); }
       });
     });
   },
@@ -762,7 +761,7 @@ const Checkout = {
       const allProducts = getProducts();
       itemsEl.innerHTML = Store.getCart().map(ci => {
         const p = allProducts.find(pr => pr.id === ci.productId); if (!p) return '';
-        return `<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-100)"><img src="${sanitizeUrl(p.image)}" style="width:48px;height:60px;object-fit:cover;border-radius:6px"><div><p style="font-size:13px;font-weight:600">${escapeHtml(p.name)}</p><p style="font-size:12px;color:var(--gray-400)">${ci.qty} × ${UI.formatPrice(p.price)}</p></div></div>`;
+        return `<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--gray-100)"><img src="${sanitizeUrl(p.image)}" style="width:48px;height:60px;object-fit:cover;border-radius:6px"><div><p style="font-size:13px;font-weight:600">${escapeHtml(p.name)}</p><p style="font-size:12px;color:var(--gray-400)">${Number(ci.qty)} × ${UI.formatPrice(p.price)}</p></div></div>`;
       }).join('');
     }
   },

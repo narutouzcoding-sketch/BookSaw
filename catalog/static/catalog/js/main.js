@@ -492,15 +492,18 @@ function ensureTrustStrip() {
 }
 
 function enhanceChrome() {
+  const main = document.getElementById('mainContent') || document.querySelector('main, .product-detail, .checkout-page, .info-page, .error-page, .card-container');
+  if (main && !main.id && !document.getElementById('mainContent')) {
+    main.id = 'mainContent';
+  }
+  const skipTargetId = document.getElementById('mainContent') ? 'mainContent' : (main ? main.id : 'mainContent');
   if (!document.querySelector('.skip-link')) {
     const a = document.createElement('a');
-    a.href = '#mainContent';
+    a.href = '#' + (skipTargetId || 'mainContent');
     a.className = 'skip-link';
     a.textContent = 'Asosiy kontentga o‘tish';
     document.body.prepend(a);
   }
-  const main = document.querySelector('main, .product-detail, .checkout-page, .info-page, .error-page, .card-container');
-  if (main && !main.id && !document.getElementById('mainContent')) main.id = 'mainContent';
 
   // Keep page weight low without delaying the logo or the first visible image.
   document.querySelectorAll('img').forEach((img, index) => {

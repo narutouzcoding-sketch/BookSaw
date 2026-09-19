@@ -120,8 +120,9 @@ function requireAuth(message = "Bu amalni bajarish uchun tizimga kiring", delay 
 }
 
 function createBinButtonHtml(text, colorClass = 'danger', id = '') {
-  const chars = text.split('').map(c => `<span class="char">${c}</span>`).join('');
-  return `<button type="button" class="eat-btn ${colorClass}" ${id ? `id="${id}"` : ''} title="${text}">
+  const safeText = escapeHtml(text);
+  const chars = safeText.split('').map(c => `<span class="char">${c}</span>`).join('');
+  return `<button type="button" class="eat-btn ${escapeHtml(colorClass)}" ${id ? `id="${escapeHtml(id)}"` : ''} title="${safeText}">
     <div class="bin-wrapper">
       <svg class="bin-svg" viewBox="0 0 20 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <g class="bin-lid">
@@ -179,7 +180,7 @@ const UI = {
     const icon = type === 'success' ? ICONS.check : type === 'error' ? ICONS.x : ICONS.info;
     const t = document.createElement('div');
     t.className = `toast toast--${type}`;
-    t.innerHTML = `<div class="toast__icon" aria-hidden="true">${icon}</div><div class="toast__message">${message}</div><button class="toast__close" type="button" aria-label="Xabarni yopish">${ICONS.x}</button>`;
+    t.innerHTML = `<div class="toast__icon" aria-hidden="true">${icon}</div><div class="toast__message">${escapeHtml(message)}</div><button class="toast__close" type="button" aria-label="Xabarni yopish">${ICONS.x}</button>`;
     t.querySelector('.toast__close')?.addEventListener('click', () => t.remove());
     c.appendChild(t);
     requestAnimationFrame(() => t.classList.add('show'));
@@ -226,7 +227,7 @@ const UI = {
           <div class="quick-view__book-cover">
             <img src="${sanitizeUrl(p.image)}" alt="${escapeHtml(p.name)}" class="quick-view__img">
             <div class="quick-view__book-spine"></div>
-            ${p.discount ? `<span class="badge badge-sale quick-view__sale-badge">-${p.discount}%</span>` : ''}
+            ${p.discount ? `<span class="badge badge-sale quick-view__sale-badge">-${Number(p.discount)}%</span>` : ''}
           </div>
         </div>
       </div>
@@ -244,8 +245,8 @@ const UI = {
         
         <div class="quick-view__rating-row">
           <span class="quick-view__stars">${renderStars(p.rating)}</span>
-          <span class="quick-view__rating-num">${p.rating}</span>
-          <span class="quick-view__reviews-count">(${p.reviewCount} ta sharh)</span>
+          <span class="quick-view__rating-num">${Number(p.rating)}</span>
+          <span class="quick-view__reviews-count">(${Number(p.reviewCount)} ta sharh)</span>
         </div>
 
         <div class="quick-view__price-row">
@@ -259,13 +260,13 @@ const UI = {
         </p>
 
         <div class="quick-view__actions">
-          <button class="btn btn-primary add-to-cart-btn quick-view__add-btn" data-id="${p.id}" ${!p.inStock ? 'disabled' : ''}>
+          <button class="btn btn-primary add-to-cart-btn quick-view__add-btn" data-id="${escapeHtml(p.id)}" ${!p.inStock ? 'disabled' : ''}>
             ${ICONS.cart} <span>${p.inStock ? "Savatga qo'shish" : "Tugagan"}</span>
           </button>
-          <button class="btn btn-secondary wishlist-toggle-btn quick-view__wishlist-btn ${inWL ? 'active' : ''}" data-id="${p.id}" title="${inWL ? "Sevimlilardan o'chirish" : "Sevimlilarga qo'shish"}">
+          <button class="btn btn-secondary wishlist-toggle-btn quick-view__wishlist-btn ${inWL ? 'active' : ''}" data-id="${escapeHtml(p.id)}" title="${inWL ? "Sevimlilardan o'chirish" : "Sevimlilarga qo'shish"}">
             ${inWL ? ICONS.heartFilled : ICONS.heart}
           </button>
-          <a href="book_detail.html?id=${p.id}" class="btn btn-outline quick-view__detail-btn">
+          <a href="book_detail.html?id=${encodeURIComponent(p.id)}" class="btn btn-outline quick-view__detail-btn">
             Batafsil
           </a>
         </div>
@@ -504,7 +505,7 @@ const UI = {
         <div id="tgStepPhone">
           <h3 style="font-size:22px;font-weight:700;margin:0 0 8px;color:var(--text-primary);">Telegram orqali kirish</h3>
           <p style="font-size:14px;color:var(--text-muted);margin:0 0 20px;line-height:1.5;">
-            Telegram raqamingizni kiriting. Biz <strong>@${botUser}</strong> boti orqali 6 xonali tasdiqlash kodini yuboramiz.
+            Telegram raqamingizni kiriting. Biz <strong>@${escapeHtml(botUser)}</strong> boti orqali 6 xonali tasdiqlash kodini yuboramiz.
           </p>
 
           <div class="tg-phone-input-wrap">
@@ -513,9 +514,9 @@ const UI = {
           </div>
           <div id="tgPhoneError" style="display:none;color:#ef4444;font-size:13px;margin:-10px 0 14px;text-align:left;"></div>
 
-          <a href="${botUrl}" target="_blank" rel="noopener noreferrer" class="tg-bot-chip" style="width:100%;justify-content:center;color:#2563eb;margin-bottom:12px;">
+          <a href="${sanitizeUrl(botUrl)}" target="_blank" rel="noopener noreferrer" class="tg-bot-chip" style="width:100%;justify-content:center;color:#2563eb;margin-bottom:12px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">${ICONS.telegram}</svg>
-            @${botUser} botida /start ni bosing
+            @${escapeHtml(botUser)} botida /start ni bosing
           </a>
 
           <button type="button" class="btn btn-primary" id="tgSendOtpBtn" style="width:100%;background:var(--primary);border-color:var(--primary);font-size:15px;font-weight:600;height:46px;margin-top:6px;">
@@ -555,8 +556,8 @@ const UI = {
             <button type="button" id="tgResendBtn" style="display:none;background:none;border:none;color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;margin-left:6px;">Qayta yuborish</button>
           </div>
 
-          <a href="${botUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width:100%;font-size:13px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
-            💬 Telegram botni ochish (@${botUser})
+          <a href="${sanitizeUrl(botUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="width:100%;font-size:13px;padding:10px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px;">
+            💬 Telegram botni ochish (@${escapeHtml(botUser)})
           </a>
 
           <button type="button" class="btn btn-primary" id="tgVerifyBtn" style="width:100%;background:var(--primary);border-color:var(--primary);font-size:15px;font-weight:600;height:46px;">
@@ -655,7 +656,7 @@ const UI = {
           const isMock = !window.Api || window.Api.isMock();
           otpNotice.innerHTML = isMock
             ? 'Demo rejim: tasdiqlash kodi <strong>123456</strong>.'
-            : `6 xonali tasdiqlash kodi <strong>@${botUser}</strong> botingizga yuborildi. Telegramdagi xabarni tekshiring.`;
+            : `6 xonali tasdiqlash kodi <strong>@${escapeHtml(botUser)}</strong> botingizga yuborildi. Telegramdagi xabarni tekshiring.`;
           otpNotice.style.display = 'block';
           otpNotice.style.borderColor = 'var(--primary)';
           otpNotice.style.color = 'var(--text-primary)';
@@ -665,9 +666,9 @@ const UI = {
         if (otpNotice) {
           otpNotice.innerHTML = `
             <div style="text-align:left;line-height:1.5;">
-              <div style="color:#ef4444;font-weight:600;margin-bottom:4px;">⚠️ Telegram Bot holati: ${apiDesc}</div>
+              <div style="color:#ef4444;font-weight:600;margin-bottom:4px;">⚠️ Telegram Bot holati: ${escapeHtml(apiDesc)}</div>
               <div style="color:var(--text-muted);font-size:12px;">
-                Iltimos, avval Telegram ilovangizda <strong>@${botUser}</strong> botini ochib <strong>/start</strong> tugmasini bosing va qaytadan kod so'rang.
+                Iltimos, avval Telegram ilovangizda <strong>@${escapeHtml(botUser)}</strong> botini ochib <strong>/start</strong> tugmasini bosing va qaytadan kod so'rang.
               </div>
             </div>`;
           otpNotice.style.display = 'block';
@@ -894,26 +895,26 @@ const UI = {
         <form id="scForm" class="social-complete__form" novalidate>
           <div class="input-group">
             <label for="scName">To'liq ism *</label>
-            <input type="text" id="scName" class="input-box" placeholder="Ism va familiyangiz" value="${rawName}" autocomplete="name">
+            <input type="text" id="scName" class="input-box" placeholder="Ism va familiyangiz" value="${escapeHtml(rawName)}" autocomplete="name">
             <span class="neu-input-error" id="scNameError">Ismingizni kamida 2 ta belgi bilan kiriting</span>
           </div>
 
           <div class="input-group">
             <label for="scUsername">Foydalanuvchi nomi (Username) *</label>
-            <input type="text" id="scUsername" class="input-box" placeholder="@username" value="${suggestedUsername}" autocomplete="username">
+            <input type="text" id="scUsername" class="input-box" placeholder="@username" value="${escapeHtml(suggestedUsername)}" autocomplete="username">
             <span class="neu-input-error" id="scUsernameError">Username kamida 3 ta harf/raqamdan iborat bo'lishi kerak</span>
           </div>
 
           <div class="social-complete__row">
             <div class="input-group" style="flex:1;">
               <label for="scEmail">Email manzil *</label>
-              <input type="email" id="scEmail" class="input-box" placeholder="pochta@gmail.com" value="${rawEmail}" autocomplete="email">
+              <input type="email" id="scEmail" class="input-box" placeholder="pochta@gmail.com" value="${escapeHtml(rawEmail)}" autocomplete="email">
               <span class="neu-input-error" id="scEmailError">To'g'ri email manzil kiriting</span>
             </div>
 
             <div class="input-group" style="flex:1;">
               <label for="scPhone">Telefon raqam</label>
-              <input type="tel" id="scPhone" class="input-box" placeholder="+998 (90) 123-45-67" value="${rawPhone}" autocomplete="tel">
+              <input type="tel" id="scPhone" class="input-box" placeholder="+998 (90) 123-45-67" value="${escapeHtml(rawPhone)}" autocomplete="tel">
               <span class="neu-input-error" id="scPhoneError">To'liq telefon raqam kiriting</span>
             </div>
           </div>

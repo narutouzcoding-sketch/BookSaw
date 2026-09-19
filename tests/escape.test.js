@@ -41,24 +41,32 @@ describe('escape.js module tests', () => {
     it('allows relative and root-relative URLs', () => {
       expect(sanitizeUrl('/static/catalog/images/book1.jpg')).toBe('/static/catalog/images/book1.jpg');
       expect(sanitizeUrl('../../static/catalog/images/banner.jpg')).toBe('../../static/catalog/images/banner.jpg');
+      expect(sanitizeUrl('book_detail.html?id=1')).toBe('book_detail.html?id=1');
     });
 
-    it('blocks javascript: protocol in various casings and spacing', () => {
-      expect(sanitizeUrl('javascript:alert(1)')).toBe('#');
-      expect(sanitizeUrl('JAVASCRIPT:alert(1)')).toBe('#');
-      expect(sanitizeUrl('  javascript:void(0)  ')).toBe('#');
-      expect(sanitizeUrl('JavaScript:document.cookie')).toBe('#');
+    it('allows mailto and tel URLs for general links', () => {
+      expect(sanitizeUrl('mailto:info@booksaw.uz')).toBe('mailto:info@booksaw.uz');
+      expect(sanitizeUrl('tel:+998901234567')).toBe('tel:+998901234567');
     });
 
-    it('blocks data:text/html protocol', () => {
-      expect(sanitizeUrl('data:text/html,<script>alert(1)</script>')).toBe('#');
-      expect(sanitizeUrl('  DATA:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==')).toBe('#');
+    it('allows safe raster image data URLs, but blocks them if isImage rejects or SVG', () => {
+      expect(sanitizeUrl('data:image/png;base64,iVBORw0KGgo=')).toBe('data:image/png;base64,iVBORw0KGgo=');
+      expect(sanitizeUrl('data:image/jpeg;base64,/9j/4AAQSkZJRg==')).toBe('data:image/jpeg;base64,/9j/4AAQSkZJRg==');
+      expect(sanitizeUrl('data:image/webp;base64,UklGR')).toBe('data:image/webp;base64,UklGR');
     });
 
-    it('handles null, undefined, and empty URLs', () => {
-      expect(sanitizeUrl(null)).toBe('');
-      expect(sanitizeUrl(undefined)).toBe('');
-      expect(sanitizeUrl('')).toBe('');
+    it('blocks bypass attempts and unsupported protocols returning about:blank', () => {
+      expect(sanitizeUrl(' javascript:alert(1)')).toBe('about:blank');
+      expect(sanitizeUrl('\tjavascript:x')).toBe('about:blank');
+      expect(sanitizeUrl('java\nscript:x')).toBe('about:blank');
+      expect(sanitizeUrl('JaVaScRiPt:x')).toBe('about:blank');
+      expect(sanitizeUrl('vbscript:x')).toBe('about:blank');
+      expect(sanitizeUrl('data:text/html,x')).toBe('about:blank');
+      expect(sanitizeUrl('data:image/svg+xml,x')).toBe('about:blank');
+      expect(sanitizeUrl('//evil.com')).toBe('about:blank');
+      expect(sanitizeUrl('')).toBe('about:blank');
+      expect(sanitizeUrl(null)).toBe('about:blank');
+      expect(sanitizeUrl(undefined)).toBe('about:blank');
     });
   });
 

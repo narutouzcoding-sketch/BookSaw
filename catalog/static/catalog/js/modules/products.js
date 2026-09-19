@@ -93,7 +93,7 @@ const Search = {
           suggestionsEl.innerHTML = `
             <div class="search-suggestions__list">
               ${results.map(p => `
-                <a href="book_detail.html?id=${p.id}" class="search-suggestions__item" data-id="${p.id}" style="display:flex;gap:12px;padding:10px 14px;align-items:center;text-decoration:none;color:inherit;border-radius:8px;margin:2px 4px;transition:background 0.15s ease;">
+                <a href="book_detail.html?id=${encodeURIComponent(p.id)}" class="search-suggestions__item" data-id="${escapeHtml(p.id)}" style="display:flex;gap:12px;padding:10px 14px;align-items:center;text-decoration:none;color:inherit;border-radius:8px;margin:2px 4px;transition:background 0.15s ease;">
                   <img src="${sanitizeUrl(p.image)}" alt="" style="width:40px;height:52px;object-fit:cover;border-radius:4px 8px 8px 4px;box-shadow:-2px 4px 10px rgba(0,0,0,0.18);flex-shrink:0;">
                   <div style="flex:1;min-width:0;">
                     <p style="font-weight:600;font-size:14px;line-height:1.3;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
@@ -261,7 +261,7 @@ function renderProductCard(product, mode = 'grid') {
   const outOverlay = !product.inStock ? '<div class="product-card__out-overlay"><span>Tugagan</span></div>' : '';
 
   let badgeHtml = '';
-  if (product.discount) badgeHtml += `<span class="badge badge-sale">-${product.discount}%</span>`;
+  if (product.discount) badgeHtml += `<span class="badge badge-sale">-${Number(product.discount)}%</span>`;
   if (product.badge === 'new') badgeHtml += '<span class="badge badge-new">Yangi</span>';
   if (product.badge === 'bestseller') badgeHtml += '<span class="badge badge-bestseller">Bestseller</span>';
 
@@ -270,27 +270,29 @@ function renderProductCard(product, mode = 'grid') {
   const safeCat = escapeHtml(product.categoryName);
   const safeImg = sanitizeUrl(product.image);
   const safeImg2 = sanitizeUrl(product.image2 || product.image);
+  const safeId = escapeHtml(product.id);
+  const encodedId = encodeURIComponent(product.id);
 
-  return `<div class="product-card${listCls}${product.inStock ? '' : ' is-out'}" data-href="book_detail.html?id=${product.id}" role="link" tabindex="0">
-    <a href="book_detail.html?id=${product.id}" class="product-card__image-wrap" aria-label="${safeName}">
+  return `<div class="product-card${listCls}${product.inStock ? '' : ' is-out'}" data-href="book_detail.html?id=${encodedId}" role="link" tabindex="0">
+    <a href="book_detail.html?id=${encodedId}" class="product-card__image-wrap" aria-label="${safeName}">
       <img class="product-card__image product-card__image--primary" src="${safeImg}" alt="${safeName}" loading="lazy" draggable="false">
       <img class="product-card__image product-card__image--hover" src="${safeImg2}" alt="" loading="lazy" draggable="false">
       ${outOverlay}
       <div class="product-card__badges">${badgeHtml}</div>
-      <button type="button" class="product-card__wishlist${inWL ? ' active' : ''}" data-id="${product.id}" title="Sevimlilarga">${inWL ? ICONS.heartFilled : ICONS.heart}</button>
+      <button type="button" class="product-card__wishlist${inWL ? ' active' : ''}" data-id="${safeId}" title="Sevimlilarga">${inWL ? ICONS.heartFilled : ICONS.heart}</button>
     </a>
     <div class="product-card__body">
       <div class="product-card__category">${safeCat}</div>
-      <a href="book_detail.html?id=${product.id}" class="product-card__title">${safeName}</a>
+      <a href="book_detail.html?id=${encodedId}" class="product-card__title">${safeName}</a>
       <p class="product-card__author">${safeAuthor}</p>
-      <div class="product-card__rating"><span class="stars">${renderStars(product.rating)}</span>${product.reviewCount ? ` <span>(${product.reviewCount})</span>` : ''}</div>
+      <div class="product-card__rating"><span class="stars">${renderStars(product.rating)}</span>${product.reviewCount ? ` <span>(${Number(product.reviewCount)})</span>` : ''}</div>
       <div class="product-card__price">
         <span class="product-card__price-current">${UI.formatPrice(product.price)}</span>
         ${product.oldPrice && product.oldPrice > product.price ? `<span class="product-card__price-old">${UI.formatPrice(product.oldPrice)}</span>` : ''}
       </div>
       <div class="product-card__cta">
-        <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" data-id="${product.id}"${!product.inStock ? ' disabled' : ''}>${product.inStock ? `${ICONS.cart} Savatga` : 'Tugagan'}</button>
-        <button type="button" class="btn btn-secondary btn-sm quick-view-btn" data-id="${product.id}">Ko'rish</button>
+        <button type="button" class="btn btn-primary btn-sm add-to-cart-btn" data-id="${safeId}"${!product.inStock ? ' disabled' : ''}>${product.inStock ? `${ICONS.cart} Savatga` : 'Tugagan'}</button>
+        <button type="button" class="btn btn-secondary btn-sm quick-view-btn" data-id="${safeId}">Ko'rish</button>
       </div>
     </div>
   </div>`;
@@ -697,8 +699,8 @@ function initCatalogPage() {
   if (catsEl) {
     catsEl.innerHTML = categories.map(c => `
       <label class="filter-checkbox">
-        <input type="checkbox" data-cat="${c.id}"${c.id === catId ? ' checked' : ''}>
-        ${escapeHtml(c.name)} <span class="count">${c.count}</span>
+        <input type="checkbox" data-cat="${escapeHtml(c.id)}"${c.id === catId ? ' checked' : ''}>
+        ${escapeHtml(c.name)} <span class="count">${Number(c.count)}</span>
       </label>`).join('');
   }
 
@@ -824,11 +826,11 @@ function initCategoriesPage() {
   const categories = getCategories();
   if (!grid || !categories.length) return;
   grid.innerHTML = categories.map(c => `
-    <a href="book_list.html?cat=${c.id}" class="category-page-card">
+    <a href="book_list.html?cat=${encodeURIComponent(c.id)}" class="category-page-card">
       <div class="category-page-card__image"><img src="${sanitizeUrl(c.image)}" alt="${escapeHtml(c.name)}" draggable="false"></div>
       <div class="category-page-card__body">
         <h3>${escapeHtml(c.name)}</h3>
-        <p>${c.count} ta kitob</p>
+        <p>${Number(c.count)} ta kitob</p>
       </div>
     </a>`).join('');
 }

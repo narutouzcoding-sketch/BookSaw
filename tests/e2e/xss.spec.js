@@ -15,7 +15,7 @@ test.describe('Enhanced XSS Sanitization & Defense Verification', () => {
     const payload = '<img src=x onerror=alert("XSS_SEARCH")>';
     await page.fill('#searchInput', payload);
     await page.dispatchEvent('#searchInput', 'input');
-    await page.waitForTimeout(400);
+    await expect(page.locator('#searchSuggestions')).toBeVisible({ timeout: 3000 });
 
     // 1. Verify no dialog/alert popped up
     expect(alertTriggered).toBe(false);
@@ -85,7 +85,7 @@ test.describe('Enhanced XSS Sanitization & Defense Verification', () => {
 
     // Open user dropdown if present
     await page.click('#userToggle');
-    await page.waitForTimeout(300);
+    await expect(page.locator('#userDropdown')).toHaveClass(/active/);
     expect(alertTriggered).toBe(false);
     expect(await page.$('img[src="x"]')).toBeNull();
 
@@ -125,7 +125,6 @@ test.describe('Enhanced XSS Sanitization & Defense Verification', () => {
 
     await page.fill('#reviewText', xssComment);
     await page.click('#reviewForm button[type="submit"]');
-    await page.waitForTimeout(400);
 
     expect(alertTriggered).toBe(false);
     expect(await page.$('img[src="x"]')).toBeNull();

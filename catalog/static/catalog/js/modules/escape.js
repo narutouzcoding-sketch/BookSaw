@@ -18,15 +18,52 @@ export function escapeHtml(str) {
 }
 
 /**
- * Xavfli URL protokollarini (javascript:, data:text/html) xavfsizlantirish
+ * URL sanitizatsiyasi (Strict Allowlist uslubida)
+ * new URL(v, base) orqali protokol tahlil qilinadi.
+ * Ruxsat berilganlar:
+ * - href: http:, https:, mailto:, tel:, nisbiy yo'llar
+ * - img src: http:, https:, nisbiy yo'llar, data:image/(png|jpeg|webp|gif) (svg qat'iyan taqiqlangan)
+ * Barcha boshqa protokollar va xavfli holatlar (javascript:, vbscript:, //evil.com, data:text/html) -> 'about:blank'
  */
-export function sanitizeUrl(url) {
-  if (!url) return '';
-  const trimmed = String(url).trim();
-  if (/^(javascript:|data:text\/html)/i.test(trimmed)) {
-    return '#';
+export function sanitizeUrl(url, opts = {}) {
+  if (url == null || typeof url !== 'string') return 'about:blank';
+  const trimmed = url.trim();
+  if (!trimmed) return 'about:blank';
+  // Protocol-relative external URLs (//evil.com) taqiqlanadi
+  if (trimmed.startsWith('//')) return 'about:blank';
+
+  let parsed;
+  try {
+    const base = typeof location !== 'undefined' && location.href ? location.href : 'http://localhost:3344/';
+    parsed = new URL(trimmed, base);
+  } catch {
+    return 'about:blank';
   }
-  return trimmed;
+
+  const protocol = parsed.protocol.toLowerCase();
+
+  // Data URLs: faqat xavfsiz raster rasmlar (SVG yo'q, chunki SVG script bajarishi mumkin)
+  if (protocol === 'data:') {
+    if (/^data:image\/(png|jpe?g|webp|gif);base64,/i.test(trimmed)) {
+      return trimmed;
+    }
+    return 'about:blank';
+  }
+
+  // Rasm manbasi bo'lsa (opts.isImage = true), mailto va tel taqiqlanadi
+  if (opts && opts.isImage) {
+    if (protocol === 'http:' || protocol === 'https:') {
+      return trimmed;
+    }
+    return 'about:blank';
+  }
+
+  // href va umumiy URL lar
+  if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:' || protocol === 'tel:') {
+    return trimmed;
+  }
+
+  return 'about:blank';
 }
 
 /**

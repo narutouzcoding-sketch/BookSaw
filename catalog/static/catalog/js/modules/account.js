@@ -549,7 +549,7 @@ const ProfilePage = {
       <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:12px;flex-wrap:wrap;gap:12px;">
         <div><strong>${escapeHtml(a.city || '')}</strong><p style="color:var(--text-muted);font-size:14px;margin:2px 0 0;">${escapeHtml(a.address || '')} ${a.name ? '— ' + escapeHtml(a.name) : ''}</p></div>
         <div style="display:flex;align-items:center;">
-          ${createBinButtonHtml("O'chirish", "danger", "addrDel_" + a.id)}
+          ${createBinButtonHtml("O'chirish", "danger", "addrDel_" + escapeHtml(a.id))}
         </div>
       </div>`).join('');
 
@@ -593,7 +593,7 @@ const ProfilePage = {
           <img src="${sanitizeUrl(i.image || '')}" alt="">
           <div>
             <strong>${escapeHtml(i.name || 'Kitob')}</strong>
-            <p>${i.qty} × ${UI.formatPrice(i.price || 0)}</p>
+            <p>${Number(i.qty)} × ${UI.formatPrice(i.price || 0)}</p>
           </div>
         </div>`).join('');
       return `<article class="order-card" style="margin-bottom:16px;">
@@ -683,7 +683,7 @@ const OrdersPage = {
           <img src="${sanitizeUrl(i.image || '')}" alt="">
           <div>
             <strong>${escapeHtml(i.name || 'Kitob')}</strong>
-            <p>${i.qty} × ${UI.formatPrice(i.price || 0)}</p>
+            <p>${Number(i.qty)} × ${UI.formatPrice(i.price || 0)}</p>
           </div>
         </div>`).join('');
       return `<article class="order-card">

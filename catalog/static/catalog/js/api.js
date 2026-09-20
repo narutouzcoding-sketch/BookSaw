@@ -35,6 +35,26 @@
     return num.toFixed(2);
   }
 
+  const getGlobalProducts = () =>
+    (typeof window !== 'undefined' && window.PRODUCTS) ||
+    (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []) ||
+    (typeof globalThis !== 'undefined' && globalThis.PRODUCTS) || [];
+
+  const getGlobalCategories = () =>
+    (typeof window !== 'undefined' && window.CATEGORIES) ||
+    (typeof CATEGORIES !== 'undefined' ? CATEGORIES : []) ||
+    (typeof globalThis !== 'undefined' && globalThis.CATEGORIES) || [];
+
+  const getGlobalReviews = () =>
+    (typeof window !== 'undefined' && window.REVIEWS) ||
+    (typeof REVIEWS !== 'undefined' ? REVIEWS : {}) ||
+    (typeof globalThis !== 'undefined' && globalThis.REVIEWS) || {};
+
+  const getGlobalQna = () =>
+    (typeof window !== 'undefined' && window.QNA) ||
+    (typeof QNA !== 'undefined' ? QNA : {}) ||
+    (typeof globalThis !== 'undefined' && globalThis.QNA) || {};
+
   const Api = {
     mockDelay: 150,
     _cache: {
@@ -96,8 +116,10 @@
       const author = raw.author || raw.author_name || '';
       const categoryId = raw.category_id !== undefined ? raw.category_id : raw.categoryId;
       const categoryName = raw.category_name || raw.categoryName || '';
-      const priceStr = toDecimalString(raw.price);
-      const oldPriceStr = raw.old_price != null || raw.oldPrice != null ? toDecimalString(raw.old_price || raw.oldPrice) : null;
+      const priceVal = raw.price != null ? (typeof raw.price === 'number' ? raw.price : parseFloat(raw.price)) : 0;
+      const oldPriceVal = raw.old_price != null || raw.oldPrice != null ? (typeof (raw.old_price || raw.oldPrice) === 'number' ? (raw.old_price || raw.oldPrice) : parseFloat(raw.old_price || raw.oldPrice)) : null;
+      const priceStr = toDecimalString(priceVal);
+      const oldPriceStr = oldPriceVal != null ? toDecimalString(oldPriceVal) : null;
       const discount = raw.discount != null ? Number(raw.discount) : 0;
       const rating = raw.rating != null ? Number(raw.rating) : 5;
       const reviewCount = raw.review_count !== undefined ? Number(raw.review_count) : Number(raw.reviewCount || 0);
@@ -111,8 +133,10 @@
         authorName: author,
         categoryId: Number(categoryId),
         categoryName,
-        price: priceStr,
-        oldPrice: oldPriceStr,
+        price: priceVal,
+        priceDecimal: priceStr,
+        oldPrice: oldPriceVal,
+        oldPriceDecimal: oldPriceStr,
         discount,
         rating,
         reviewCount,
@@ -121,6 +145,14 @@
         image: raw.image || '',
         image2: raw.image2 || raw.image || '',
         description: raw.description || '',
+        variants: raw.variants || null,
+        storeId: raw.store_id || raw.storeId || 1,
+        year: raw.year || 2023,
+        pages: raw.pages || 0,
+        isbn: raw.isbn || '',
+        publisher: raw.publisher || '',
+        language: raw.language || 'Ingliz',
+        sold: raw.sold || 0,
         features: Array.isArray(raw.features)
           ? raw.features.map(f => ({
               key: f.key || f.label || '',
@@ -222,7 +254,7 @@
       }
 
       // Mock Adapter
-      const rawProducts = (typeof window !== 'undefined' && window.PRODUCTS) || [];
+      const rawProducts = getGlobalProducts();
       let filtered = [...rawProducts];
 
       // 1. Qidiruv filtri
@@ -341,27 +373,22 @@
       }
 
       // Mock Adapter
-      const rawProducts = (typeof window !== 'undefined' && window.PRODUCTS) || [];
+      if (this._cache.productsMap.has(numId)) {
+        return this._cache.productsMap.get(numId);
+      }
+
+      const rawProducts = getGlobalProducts();
       const found = rawProducts.find(p => p.id === numId);
       if (!found) return null;
 
       const normalized = this.normalizeProduct({
-        id: found.id,
-        name: found.name,
-        author: found.author,
+        ...found,
         category_id: found.categoryId,
         category_name: found.categoryName,
         price: toDecimalString(found.price),
         old_price: found.oldPrice ? toDecimalString(found.oldPrice) : null,
-        discount: found.discount || 0,
-        rating: found.rating || 5,
         review_count: found.reviewCount || 0,
-        in_stock: found.inStock !== false,
-        badge: found.badge || '',
-        image: found.image || '',
-        image2: found.image2 || found.image || '',
-        description: found.description || '',
-        features: found.features || []
+        in_stock: found.inStock !== false
       });
 
       this._cache.productsMap.set(normalized.id, normalized);
@@ -387,7 +414,7 @@
       }
 
       // Mock Adapter
-      const rawCategories = (typeof window !== 'undefined' && window.CATEGORIES) || [];
+      const rawCategories = getGlobalCategories();
       const results = rawCategories.map(c => this.normalizeCategory({
         id: c.id,
         name: c.name,
@@ -429,7 +456,7 @@
       }
 
       // Mock Adapter: data.js REVIEWS + localStorage
-      const seededReviews = ((typeof window !== 'undefined' && window.REVIEWS) || {})[numId] || [];
+      const seededReviews = (getGlobalReviews())[numId] || [];
       let localReviews = [];
       try {
         if (typeof localStorage !== 'undefined') {
@@ -511,7 +538,7 @@
       }
 
       // Mock Adapter
-      const seededQna = ((typeof window !== 'undefined' && window.QNA) || {})[numId] || [];
+      const seededQna = (getGlobalQna())[numId] || [];
       let localQna = [];
       try {
         if (typeof localStorage !== 'undefined') {
@@ -583,7 +610,7 @@
       if (this._cache.productsMap.has(numId)) {
         return this._cache.productsMap.get(numId);
       }
-      const raw = (typeof window !== 'undefined' && window.PRODUCTS) || [];
+      const raw = getGlobalProducts();
       const found = raw.find(p => p.id === numId);
       if (found) {
         const norm = this.normalizeProduct(found);
@@ -635,8 +662,9 @@
   };
 
   // Keshni dastlabki mahsulotlar bilan oldindan qizdirish (agar PRODUCTS mavjud bo'lsa)
-  if (typeof window !== 'undefined' && window.PRODUCTS && Array.isArray(window.PRODUCTS)) {
-    window.PRODUCTS.forEach(p => Api._cache.productsMap.set(p.id, Api.normalizeProduct(p)));
+  const initialProducts = getGlobalProducts();
+  if (Array.isArray(initialProducts) && initialProducts.length > 0) {
+    initialProducts.forEach(p => Api._cache.productsMap.set(p.id, Api.normalizeProduct(p)));
   }
 
   // Global va modul export

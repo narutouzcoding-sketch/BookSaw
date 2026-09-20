@@ -485,3 +485,32 @@ const STORES = [
         description: "Turli nashriyotlarning kitoblari bitta joyda. Hamyonbop narx va keng tanlov."
     }
 ];
+
+if (typeof window !== 'undefined') {
+    window.CATEGORIES = CATEGORIES;
+    window.PRODUCTS = PRODUCTS;
+    window.REVIEWS = REVIEWS;
+    window.QNA = QNA;
+    window.BANNERS = BANNERS;
+    window.POSTS = POSTS;
+    window.BRANDS = BRANDS;
+    window.PROMO_CODES = PROMO_CODES;
+    window.DELIVERY_OPTIONS = DELIVERY_OPTIONS;
+    window.PAYMENT_METHODS = PAYMENT_METHODS;
+    window.INFO_PAGES = INFO_PAGES;
+    window.STORES = STORES;
+}
+if (typeof globalThis !== 'undefined') {
+    globalThis.CATEGORIES = CATEGORIES;
+    globalThis.PRODUCTS = PRODUCTS;
+    globalThis.REVIEWS = REVIEWS;
+    globalThis.QNA = QNA;
+    globalThis.BANNERS = BANNERS;
+    globalThis.POSTS = POSTS;
+    globalThis.BRANDS = BRANDS;
+    globalThis.PROMO_CODES = PROMO_CODES;
+    globalThis.DELIVERY_OPTIONS = DELIVERY_OPTIONS;
+    globalThis.PAYMENT_METHODS = PAYMENT_METHODS;
+    globalThis.INFO_PAGES = INFO_PAGES;
+    globalThis.STORES = STORES;
+}

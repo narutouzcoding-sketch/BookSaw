@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import permissions, serializers as drf_serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -61,6 +61,7 @@ def _merge_wishlist(session_key, user):
             item.delete()
 
 
+@method_decorator(csrf_protect, name='dispatch')
 class RegisterView(APIView):
     """POST /api/v1/auth/register/"""
     permission_classes = [permissions.AllowAny]
@@ -77,6 +78,7 @@ class RegisterView(APIView):
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
+@method_decorator(csrf_protect, name='dispatch')
 class LoginView(APIView):
     """POST /api/v1/auth/login/"""
     permission_classes = [permissions.AllowAny]

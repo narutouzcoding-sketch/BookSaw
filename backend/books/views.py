@@ -1,0 +1,473 @@
+from decimal import Decimal
+
+from django.db import transaction
+from django.db.models import Avg, Count, Q, Value
+from django.db.models.functions import Coalesce
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
+
+from drf_spectacular.utils import extend_schema
+
+from .models import (
+    Book, Cart, CartItem, Category, Order, OrderItem,
+    PromoCode, Question, Review, WishlistItem,
+)
+from .permissions import IsOwnerOrReadOnly
+from .serializers import (
+    BookDetailSerializer, BookListSerializer, CartItemSerializer,
+    CartSerializer, CategorySerializer, OrderCreateSerializer,
+    OrderSerializer, PromoResultSerializer, PromoValidateSerializer,
+    QuestionSerializer, ReviewSerializer, WishlistItemSerializer,
+    CartAddSerializer, CartUpdateSerializer, CartDeleteSerializer,
+    WishlistAddSerializer,
+)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+DELIVERY_PRICES = {1: Decimal('15000'), 2: Decimal('35000'), 3: Decimal('0')}
+
+
+def _book_queryset():
+    """Base queryset with rating/review_count annotations."""
+    return (
+        Book.objects
+        .select_related('author', 'category')
+        .annotate(
+            rating=Coalesce(Avg('reviews__rating'), Value(0.0)),
+            review_count=Count('reviews'),
+        )
+    )
+
+
+def _get_or_create_cart(request):
+    """Get or create cart for current user/session."""
+    if request.user.is_authenticated:
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+    else:
+        if not request.session.session_key:
+            request.session.create()
+        sk = request.session.session_key
+        cart, _ = Cart.objects.get_or_create(session_key=sk, user__isnull=True)
+    return cart
+
+
+def _get_wishlist_filter(request):
+    """Return Q filter for current user/session wishlist."""
+    if request.user.is_authenticated:
+        return Q(user=request.user)
+    if not request.session.session_key:
+        request.session.create()
+    return Q(session_key=request.session.session_key, user__isnull=True)
+
+
+# ---------------------------------------------------------------------------
+# Books
+# ---------------------------------------------------------------------------
+
+class BookViewSet(viewsets.ReadOnlyModelViewSet):
+    """GET /api/v1/books/ and GET /api/v1/books/{id}/"""
+    permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = {'category': ['exact'], 'author': ['exact']}
+    search_fields = ['title', 'author__name', 'description']
+    ordering_fields = ['title', 'price', 'published_year', 'created_at', 'sold']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        return _book_queryset()
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return BookDetailSerializer
+        return BookListSerializer
+
+
+# ---------------------------------------------------------------------------
+# Categories
+# ---------------------------------------------------------------------------
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """GET /api/v1/categories/"""
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None  # categories are few, no pagination
+
+    def get_queryset(self):
+        return Category.objects.annotate(products_count=Count('books'))
+
+
+# ---------------------------------------------------------------------------
+# Reviews
+# ---------------------------------------------------------------------------
+
+class ReviewListCreateView(generics.ListCreateAPIView):
+    """GET/POST /api/v1/books/{book_id}/reviews/"""
+    serializer_class = ReviewSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or 'book_id' not in self.kwargs:
+            return Review.objects.none()
+        return (
+            Review.objects
+            .filter(book_id=self.kwargs['book_id'])
+            .select_related('user')
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+            book_id=self.kwargs['book_id'],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Questions
+# ---------------------------------------------------------------------------
+
+class QuestionListCreateView(generics.ListCreateAPIView):
+    """GET/POST /api/v1/books/{book_id}/questions/"""
+    serializer_class = QuestionSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or 'book_id' not in self.kwargs:
+            return Question.objects.none()
+        return (
+            Question.objects
+            .filter(book_id=self.kwargs['book_id'])
+            .select_related('user')
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+            book_id=self.kwargs['book_id'],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Cart
+# ---------------------------------------------------------------------------
+
+class CartView(APIView):
+    """
+    GET    /api/v1/cart/              -> full cart with server prices
+    POST   /api/v1/cart/              -> add item {book_id, quantity, variant}
+    PATCH  /api/v1/cart/              -> update item {book_id, quantity}
+    DELETE /api/v1/cart/              -> remove item {book_id} or clear {clear: true}
+    """
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(responses={200: CartSerializer})
+    def get(self, request):
+        cart = _get_or_create_cart(request)
+        cart_with_items = Cart.objects.prefetch_related(
+            'items', 'items__book', 'items__book__author'
+        ).get(pk=cart.pk)
+        return Response(CartSerializer(cart_with_items).data)
+
+    @extend_schema(request=CartAddSerializer, responses={201: CartSerializer})
+    def post(self, request):
+        cart = _get_or_create_cart(request)
+        book_id = request.data.get('book_id')
+        quantity = int(request.data.get('quantity', 1))
+        variant = request.data.get('variant', '')
+
+        if not book_id:
+            return Response({'detail': 'book_id majburiy.'}, status=400)
+
+        try:
+            book = Book.objects.get(pk=book_id)
+        except Book.DoesNotExist:
+            return Response({'detail': 'Kitob topilmadi.'}, status=404)
+
+        item, created = CartItem.objects.get_or_create(
+            cart=cart, book=book,
+            defaults={'quantity': min(quantity, 10), 'variant': variant or ''},
+        )
+        if not created:
+            item.quantity = min(10, item.quantity + quantity)
+            item.save()
+
+        cart.refresh_from_db()
+        cart_with_items = Cart.objects.prefetch_related(
+            'items', 'items__book', 'items__book__author'
+        ).get(pk=cart.pk)
+        return Response(CartSerializer(cart_with_items).data, status=201)
+
+    @extend_schema(request=CartUpdateSerializer, responses={200: CartSerializer})
+    def patch(self, request):
+        cart = _get_or_create_cart(request)
+        book_id = request.data.get('book_id')
+        quantity = request.data.get('quantity')
+
+        if not book_id or quantity is None:
+            return Response({'detail': 'book_id va quantity majburiy.'}, status=400)
+
+        quantity = max(1, min(10, int(quantity)))
+        try:
+            item = CartItem.objects.get(cart=cart, book_id=book_id)
+        except CartItem.DoesNotExist:
+            return Response({'detail': 'Mahsulot savatda topilmadi.'}, status=404)
+
+        item.quantity = quantity
+        item.save()
+
+        cart_with_items = Cart.objects.prefetch_related(
+            'items', 'items__book', 'items__book__author'
+        ).get(pk=cart.pk)
+        return Response(CartSerializer(cart_with_items).data)
+
+    @extend_schema(request=CartDeleteSerializer, responses={200: CartSerializer})
+    def delete(self, request):
+        cart = _get_or_create_cart(request)
+        if request.data.get('clear'):
+            cart.items.all().delete()
+        else:
+            book_id = request.data.get('book_id')
+            if not book_id:
+                return Response({'detail': 'book_id yoki clear majburiy.'}, status=400)
+            CartItem.objects.filter(cart=cart, book_id=book_id).delete()
+
+        cart_with_items = Cart.objects.prefetch_related(
+            'items', 'items__book', 'items__book__author'
+        ).get(pk=cart.pk)
+        return Response(CartSerializer(cart_with_items).data)
+
+
+# ---------------------------------------------------------------------------
+# Wishlist
+# ---------------------------------------------------------------------------
+
+class WishlistView(APIView):
+    """
+    GET    /api/v1/wishlist/          -> list wishlist items
+    POST   /api/v1/wishlist/          -> add {book_id}
+    DELETE /api/v1/wishlist/          -> remove {book_id}
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def _items(self, request):
+        filt = _get_wishlist_filter(request)
+        return WishlistItem.objects.filter(filt).select_related('book', 'book__author')
+
+    @extend_schema(responses={200: WishlistItemSerializer(many=True)})
+    def get(self, request):
+        items = self._items(request)
+        return Response(WishlistItemSerializer(items, many=True).data)
+
+    @extend_schema(request=WishlistAddSerializer, responses={201: WishlistItemSerializer(many=True)})
+    def post(self, request):
+        book_id = request.data.get('book_id')
+        if not book_id:
+            return Response({'detail': 'book_id majburiy.'}, status=400)
+
+        try:
+            book = Book.objects.get(pk=book_id)
+        except Book.DoesNotExist:
+            return Response({'detail': 'Kitob topilmadi.'}, status=404)
+
+        defaults = {}
+        if request.user.is_authenticated:
+            defaults['user'] = request.user
+        else:
+            if not request.session.session_key:
+                request.session.create()
+            defaults['session_key'] = request.session.session_key
+
+        # Check for duplicates
+        filt = _get_wishlist_filter(request) & Q(book=book)
+        if WishlistItem.objects.filter(filt).exists():
+            return Response({'detail': 'Allaqachon sevimlilarda.'}, status=200)
+
+        WishlistItem.objects.create(book=book, **defaults)
+        items = self._items(request)
+        return Response(WishlistItemSerializer(items, many=True).data, status=201)
+
+    @extend_schema(request=WishlistAddSerializer, responses={200: WishlistItemSerializer(many=True)})
+    def delete(self, request):
+        book_id = request.data.get('book_id')
+        if not book_id:
+            return Response({'detail': 'book_id majburiy.'}, status=400)
+
+        filt = _get_wishlist_filter(request) & Q(book_id=book_id)
+        WishlistItem.objects.filter(filt).delete()
+        items = self._items(request)
+        return Response(WishlistItemSerializer(items, many=True).data)
+
+
+# ---------------------------------------------------------------------------
+# Promo Validation
+# ---------------------------------------------------------------------------
+
+class PromoValidateView(APIView):
+    """POST /api/v1/promo/validate/  {code, subtotal}"""
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(request=PromoValidateSerializer, responses={200: PromoResultSerializer})
+    def post(self, request):
+        ser = PromoValidateSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        code = ser.validated_data['code'].strip().upper()
+        subtotal = ser.validated_data['subtotal']
+
+        try:
+            promo = PromoCode.objects.get(code=code)
+        except PromoCode.DoesNotExist:
+            return Response({'detail': "Noto'g'ri promo-kod."}, status=400)
+
+        if not promo.is_valid():
+            return Response({'detail': 'Promo-kod muddati tugagan yoki faol emas.'}, status=400)
+
+        if subtotal < promo.min_order:
+            return Response(
+                {'detail': f'Minimal buyurtma: {promo.min_order}'},
+                status=400,
+            )
+
+        if promo.type == 'percent':
+            discount_amount = (subtotal * promo.value / 100).quantize(Decimal('1'))
+        else:
+            discount_amount = Decimal('0')
+
+        result = PromoResultSerializer({
+            'code': promo.code,
+            'type': promo.type,
+            'value': promo.value,
+            'discount_amount': discount_amount,
+            'min_order': promo.min_order,
+        })
+        return Response(result.data)
+
+
+# ---------------------------------------------------------------------------
+# Orders
+# ---------------------------------------------------------------------------
+
+class OrderListCreateView(generics.ListCreateAPIView):
+    """
+    GET  /api/v1/orders/   -> own orders only
+    POST /api/v1/orders/   -> create order from cart
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return OrderCreateSerializer
+        return OrderSerializer
+
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False) or not self.request.user.is_authenticated:
+            return Order.objects.none()
+        return (
+            Order.objects
+            .filter(user=self.request.user)
+            .prefetch_related('items', 'items__book')
+        )
+
+    def create(self, request, *args, **kwargs):
+        ser = OrderCreateSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        data = ser.validated_data
+
+        with transaction.atomic():
+            # 1. Get user's cart
+            try:
+                cart = Cart.objects.prefetch_related('items', 'items__book').get(
+                    user=request.user
+                )
+            except Cart.DoesNotExist:
+                return Response({'detail': 'Savat topilmadi.'}, status=400)
+
+            cart_items = list(cart.items.select_for_update().select_related('book').all())
+            if not cart_items:
+                return Response({'detail': "Savat bo'sh."}, status=400)
+
+            # 2. Check stock for all items
+            for ci in cart_items:
+                if not ci.book.in_stock:
+                    return Response(
+                        {'detail': f'"{ci.book.title}" omborda mavjud emas.'},
+                        status=400,
+                    )
+
+            # 3. Server-side price calculation
+            subtotal = sum(ci.book.price * ci.quantity for ci in cart_items)
+
+            # 4. Promo
+            discount = Decimal('0')
+            promo_code_str = data.get('promo_code', '').strip().upper()
+            if promo_code_str:
+                try:
+                    promo = PromoCode.objects.select_for_update().get(code=promo_code_str)
+                    if promo.is_valid() and subtotal >= promo.min_order:
+                        if promo.type == 'percent':
+                            discount = (subtotal * promo.value / 100).quantize(Decimal('1'))
+                        promo.used_count += 1
+                        promo.save(update_fields=['used_count'])
+                except PromoCode.DoesNotExist:
+                    pass  # invalid promo silently ignored during order
+
+            # 5. Delivery cost
+            delivery_id = data.get('delivery_option_id', 1)
+            delivery_cost = DELIVERY_PRICES.get(delivery_id, Decimal('15000'))
+
+            # Free shipping promo
+            if promo_code_str:
+                try:
+                    promo_obj = PromoCode.objects.get(code=promo_code_str)
+                    if promo_obj.type == 'freeShipping':
+                        delivery_cost = Decimal('0')
+                except PromoCode.DoesNotExist:
+                    pass
+
+            total = max(Decimal('0'), subtotal - discount + delivery_cost)
+
+            # 6. Create order
+            order = Order.objects.create(
+                user=request.user,
+                subtotal=subtotal,
+                discount=discount,
+                delivery_cost=delivery_cost,
+                total=total,
+                promo_code=promo_code_str,
+                address_snapshot=data.get('address', {}),
+                payment_method=data.get('payment_method', ''),
+            )
+
+            # 7. Create order items + update sold count
+            for ci in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    book=ci.book,
+                    title=ci.book.title,
+                    price=ci.book.price,
+                    quantity=ci.quantity,
+                    image=ci.book.image,
+                )
+                Book.objects.filter(pk=ci.book.pk).update(
+                    sold=ci.book.sold + ci.quantity
+                )
+
+            # 8. Clear cart
+            cart.items.all().delete()
+
+        # Reload order with items for response
+        order = Order.objects.prefetch_related('items', 'items__book').get(pk=order.pk)
+        return Response(OrderSerializer(order).data, status=201)

@@ -24,7 +24,8 @@ class ReviewInline(admin.TabularInline):
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'category', 'price', 'in_stock', 'badge']
+    list_display = ['title', 'author', 'category', 'price', 'in_stock', 'stock_quantity', 'sold', 'badge']
+    list_editable = ['stock_quantity', 'in_stock']
     list_filter = ['category', 'in_stock', 'badge']
     search_fields = ['title', 'author__name', 'isbn']
     inlines = [ReviewInline]

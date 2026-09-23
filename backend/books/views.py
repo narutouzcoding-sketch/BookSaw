@@ -412,9 +412,14 @@ class OrderListCreateView(generics.ListCreateAPIView):
             # 3. Check stock using locked book instances (not stale ci.book)
             for ci in cart_items:
                 book = books[ci.book_id]
-                if not book.in_stock:
+                if not book.in_stock or book.stock_quantity <= 0:
                     return Response(
                         {'detail': f'"{book.title}" omborda mavjud emas.'},
+                        status=400,
+                    )
+                if book.stock_quantity < ci.quantity:
+                    return Response(
+                        {'detail': f'"{book.title}" uchun omborda yetarli zaxira yo\'q (qoldiq: {book.stock_quantity} ta).'},
                         status=400,
                     )
 
@@ -447,7 +452,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
             total = max(Decimal('0'), subtotal - discount + delivery_cost)
 
-            # 6. Create order
+            # 7. Create order
             order = Order.objects.create(
                 user=request.user,
                 subtotal=subtotal,
@@ -459,7 +464,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 payment_method=data.get('payment_method', ''),
             )
 
-            # 8. Create order items + update sold count atomically
+            # 8. Create order items + update sold and stock counts atomically
             for ci in cart_items:
                 book = books[ci.book_id]
                 OrderItem.objects.create(
@@ -470,11 +475,14 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     quantity=ci.quantity,
                     image=book.image,
                 )
-                # F() generates SQL: UPDATE ... SET sold = sold + N
-                # This is atomic — no stale-read race condition.
+                # F() generates SQL: UPDATE ... SET sold = sold + N, stock_quantity = stock_quantity - N
+                # This is atomic — prevents overselling and race conditions.
                 Book.objects.filter(pk=book.pk).update(
-                    sold=F('sold') + ci.quantity
+                    sold=F('sold') + ci.quantity,
+                    stock_quantity=F('stock_quantity') - ci.quantity,
                 )
+                # Auto-toggle in_stock to False if stock reaches 0
+                Book.objects.filter(pk=book.pk, stock_quantity__lte=0).update(in_stock=False)
 
             # 9. Clear cart
             cart.items.all().delete()

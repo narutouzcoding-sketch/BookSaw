@@ -421,3 +421,50 @@ class TestOrdersAPI:
 
         b1.refresh_from_db()
         assert b1.sold == initial_sold + 2 + 3  # F() kumulyativ qo'shadi
+
+    def test_order_stock_quantity_depletion_and_out_of_stock_toggle(self, auth_client, user, catalog_setup):
+        """
+        stock_quantity kamayishi va 0 ga tushganda in_stock avtomatik False bo'lishini tekshiradi:
+        1. Zaxiradan ko'p buyurtma berilsa 400 qaytadi.
+        2. Mavjud barcha zaxira sotib olinsa, stock_quantity=0 va in_stock=False bo'ladi.
+        3. Keyingi buyurtma "omborda mavjud emas" deb rad etiladi.
+        """
+        b2 = catalog_setup['b2']
+        b2.stock_quantity = 2
+        b2.in_stock = True
+        b2.save()
+
+        # 1. Zaxiradan ortiq (3 dona) buyurtma berishga urinish -> 400
+        cart, _ = Cart.objects.get_or_create(user=user)
+        CartItem.objects.create(cart=cart, book=b2, quantity=3)
+        res_fail = auth_client.post('/api/v1/orders/', {
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res_fail.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'omborda yetarli zaxira yo\'q' in res_fail.data['detail']
+
+        # 2. Mavjud 2 donani sotib olish -> 201
+        CartItem.objects.filter(cart=cart, book=b2).update(quantity=2)
+        res_ok = auth_client.post('/api/v1/orders/', {
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res_ok.status_code == status.HTTP_201_CREATED
+
+        b2.refresh_from_db()
+        assert b2.stock_quantity == 0
+        assert b2.in_stock is False
+
+        # 3. Zaxira tugagandan keyin yangi buyurtma berishga urinish -> 400
+        cart2, _ = Cart.objects.get_or_create(user=user)
+        CartItem.objects.create(cart=cart2, book=b2, quantity=1)
+        res_empty = auth_client.post('/api/v1/orders/', {
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res_empty.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'omborda mavjud emas' in res_empty.data['detail']

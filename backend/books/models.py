@@ -55,6 +55,7 @@ class Book(models.Model):
     # rating is computed from Review avg
     # review_count is computed from Review count
     in_stock = models.BooleanField(default=True)
+    stock_quantity = models.PositiveIntegerField(default=10)
     badge = models.CharField(max_length=20, blank=True, default='')  # new, sale, bestseller
     published_year = models.PositiveIntegerField(null=True, blank=True)
     pages = models.PositiveIntegerField(default=0)

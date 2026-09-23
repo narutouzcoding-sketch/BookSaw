@@ -35,7 +35,7 @@ class BookListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'author_name', 'category_id', 'category_name',
             'price', 'old_price', 'discount', 'rating', 'review_count',
-            'in_stock', 'badge', 'image', 'image2', 'description',
+            'in_stock', 'stock_quantity', 'badge', 'image', 'image2', 'description',
             'pages', 'isbn', 'publisher', 'language', 'published_year',
             'sold', 'store_id', 'features', 'variants', 'created_at',
         ]

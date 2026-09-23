@@ -189,5 +189,7 @@ class OrderCreateSerializer(serializers.Serializer):
     """Input for creating order from cart. Prices recalculated server-side."""
     promo_code = serializers.CharField(required=False, allow_blank=True, default='')
     address = serializers.JSONField(required=False, default=dict)
-    delivery_option_id = serializers.IntegerField(required=False, default=1)
+    delivery_option_id = serializers.IntegerField(required=False, default=None)
+    delivery = serializers.JSONField(required=False, default=dict)
     payment_method = serializers.CharField(required=False, default='')
+    payment = serializers.JSONField(required=False, default=dict)

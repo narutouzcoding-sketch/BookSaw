@@ -130,6 +130,17 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+# DIQQAT: Quyidagi ro'yxat FAQAT mahalliy development/test muhiti uchun.
+# Production deploy paytida bu qiymatlar haqiqiy frontend domeniga (.env orqali) almashtirilishi shart.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",  # VSCode Live Server standart porti
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False
@@ -137,6 +148,10 @@ SESSION_COOKIE_SECURE = False
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
 ]
 
 REST_FRAMEWORK = {

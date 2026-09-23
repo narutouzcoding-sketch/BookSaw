@@ -463,8 +463,16 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     except PromoCode.DoesNotExist:
                         pass  # invalid promo silently ignored during order
 
-                # 6. Delivery cost
-                delivery_id = data.get('delivery_option_id', 1)
+                # 6. Delivery cost (supports both delivery_option_id and frontend's delivery object)
+                delivery_id = (
+                    data.get('delivery_option_id')
+                    or (data.get('delivery', {}).get('id') if isinstance(data.get('delivery'), dict) else None)
+                    or 1
+                )
+                try:
+                    delivery_id = int(delivery_id)
+                except (ValueError, TypeError):
+                    delivery_id = 1
                 delivery_cost = DELIVERY_PRICES.get(delivery_id, Decimal('15000'))
 
                 # Free shipping promo (use already-fetched promo, no second query)
@@ -472,6 +480,14 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     delivery_cost = Decimal('0')
 
                 total = max(Decimal('0'), subtotal - discount + delivery_cost)
+
+                # Payment method string (supports string or frontend's payment object)
+                payment_str = (
+                    data.get('payment_method')
+                    or (data.get('payment', {}).get('name') if isinstance(data.get('payment'), dict) else '')
+                    or (data.get('payment', {}).get('id') if isinstance(data.get('payment'), dict) else '')
+                    or ''
+                )
 
                 # 7. Create order
                 order = Order.objects.create(
@@ -482,7 +498,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
                     total=total,
                     promo_code=promo_code_str,
                     address_snapshot=data.get('address', {}),
-                    payment_method=data.get('payment_method', ''),
+                    payment_method=payment_str,
                 )
 
                 # 8. Create order items + update sold and stock counts atomically

@@ -203,6 +203,18 @@
     },
 
     /**
+     * CSRF cookie o'rnatilganini ta'minlash (POST so'rovlar oldidan)
+     */
+    async ensureCsrfCookie() {
+      if (this.isMock() || typeof document === 'undefined') return;
+      if (!document.cookie.includes('csrftoken=')) {
+        await fetch(((window.APP_CONFIG && window.APP_CONFIG.API_BASE) || '') + '/auth/csrf', {
+          credentials: 'include'
+        }).catch(() => {});
+      }
+    },
+
+    /**
      * Umumiy HTTP so'rov bajaruvchi
      */
     async request(path, opts = {}) {
@@ -211,6 +223,15 @@
         'Content-Type': 'application/json',
         ...(opts.headers || {})
       };
+
+      // Django CSRF token: Non-GET so'rovlar uchun cookie'dan o'qib X-CSRFToken headeriga qo'shish
+      if (opts.method && opts.method.toUpperCase() !== 'GET' && typeof document !== 'undefined') {
+        const csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
+        if (csrfMatch && !headers['X-CSRFToken']) {
+          headers['X-CSRFToken'] = csrfMatch[1];
+        }
+      }
+
       const res = await fetch(base + path, { credentials: 'include', ...opts, headers });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -624,15 +645,24 @@
     // MAVJUD QO'LLAB-QUVVATLANUVCHI METODLAR (B2/B3/B4 da kengaytiriladi)
     // =========================================================================
     async login(email, password) {
-      if (!this.isMock()) return this.request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+      if (!this.isMock()) {
+        await this.ensureCsrfCookie();
+        return this.request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+      }
       return global.Store ? global.Store.login(email, password) : null;
     },
     async register(payload) {
-      if (!this.isMock()) return this.request("/auth/register", { method: "POST", body: JSON.stringify(payload) });
+      if (!this.isMock()) {
+        await this.ensureCsrfCookie();
+        return this.request("/auth/register", { method: "POST", body: JSON.stringify(payload) });
+      }
       return global.Store ? global.Store.register(payload.name, payload.email, payload.phone, payload.password) : null;
     },
     async checkout(orderData) {
-      if (!this.isMock()) return this.request("/checkout", { method: "POST", body: JSON.stringify(orderData) });
+      if (!this.isMock()) {
+        await this.ensureCsrfCookie();
+        return this.request("/checkout", { method: "POST", body: JSON.stringify(orderData) });
+      }
       return global.Store ? global.Store.createOrder(orderData) : null;
     },
     async newsletter(email) {

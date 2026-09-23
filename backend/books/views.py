@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Avg, Count, Q, Value
+from django.db.models import Avg, Count, F, Q, Value
 from django.db.models.functions import Coalesce
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
@@ -396,28 +396,40 @@ class OrderListCreateView(generics.ListCreateAPIView):
             except Cart.DoesNotExist:
                 return Response({'detail': 'Savat topilmadi.'}, status=400)
 
-            cart_items = list(cart.items.select_for_update().select_related('book').all())
+            cart_items = list(cart.items.select_related('book').all())
             if not cart_items:
                 return Response({'detail': "Savat bo'sh."}, status=400)
 
-            # 2. Check stock for all items
+            # 2. Lock Book rows to prevent concurrent race conditions.
+            #    order_by('pk') prevents deadlocks when multiple transactions
+            #    lock the same books in different order.
+            book_ids = [ci.book_id for ci in cart_items]
+            books = {
+                b.pk: b
+                for b in Book.objects.select_for_update().filter(pk__in=book_ids).order_by('pk')
+            }
+
+            # 3. Check stock using locked book instances (not stale ci.book)
             for ci in cart_items:
-                if not ci.book.in_stock:
+                book = books[ci.book_id]
+                if not book.in_stock:
                     return Response(
-                        {'detail': f'"{ci.book.title}" omborda mavjud emas.'},
+                        {'detail': f'"{book.title}" omborda mavjud emas.'},
                         status=400,
                     )
 
-            # 3. Server-side price calculation
-            subtotal = sum(ci.book.price * ci.quantity for ci in cart_items)
+            # 4. Server-side price calculation using locked book prices
+            subtotal = sum(books[ci.book_id].price * ci.quantity for ci in cart_items)
 
-            # 4. Promo
+            # 5. Promo
             discount = Decimal('0')
             promo_code_str = data.get('promo_code', '').strip().upper()
+            applied_promo = None
             if promo_code_str:
                 try:
                     promo = PromoCode.objects.select_for_update().get(code=promo_code_str)
                     if promo.is_valid() and subtotal >= promo.min_order:
+                        applied_promo = promo
                         if promo.type == 'percent':
                             discount = (subtotal * promo.value / 100).quantize(Decimal('1'))
                         promo.used_count += 1
@@ -425,18 +437,13 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 except PromoCode.DoesNotExist:
                     pass  # invalid promo silently ignored during order
 
-            # 5. Delivery cost
+            # 6. Delivery cost
             delivery_id = data.get('delivery_option_id', 1)
             delivery_cost = DELIVERY_PRICES.get(delivery_id, Decimal('15000'))
 
-            # Free shipping promo
-            if promo_code_str:
-                try:
-                    promo_obj = PromoCode.objects.get(code=promo_code_str)
-                    if promo_obj.type == 'freeShipping':
-                        delivery_cost = Decimal('0')
-                except PromoCode.DoesNotExist:
-                    pass
+            # Free shipping promo (use already-fetched promo, no second query)
+            if applied_promo and applied_promo.type == 'freeShipping':
+                delivery_cost = Decimal('0')
 
             total = max(Decimal('0'), subtotal - discount + delivery_cost)
 
@@ -452,21 +459,24 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 payment_method=data.get('payment_method', ''),
             )
 
-            # 7. Create order items + update sold count
+            # 8. Create order items + update sold count atomically
             for ci in cart_items:
+                book = books[ci.book_id]
                 OrderItem.objects.create(
                     order=order,
-                    book=ci.book,
-                    title=ci.book.title,
-                    price=ci.book.price,
+                    book=book,
+                    title=book.title,
+                    price=book.price,
                     quantity=ci.quantity,
-                    image=ci.book.image,
+                    image=book.image,
                 )
-                Book.objects.filter(pk=ci.book.pk).update(
-                    sold=ci.book.sold + ci.quantity
+                # F() generates SQL: UPDATE ... SET sold = sold + N
+                # This is atomic — no stale-read race condition.
+                Book.objects.filter(pk=book.pk).update(
+                    sold=F('sold') + ci.quantity
                 )
 
-            # 8. Clear cart
+            # 9. Clear cart
             cart.items.all().delete()
 
         # Reload order with items for response

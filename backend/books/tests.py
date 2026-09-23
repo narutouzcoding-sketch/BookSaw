@@ -382,3 +382,42 @@ class TestOrdersAPI:
         ids = [x['id'] for x in res.data['results']]
         assert o1.id in ids
         assert o2.id not in ids
+
+    def test_order_sold_counter_f_expression_sequential(self, auth_client, user, catalog_setup):
+        """
+        Mantiqiy test: ikkita ketma-ket buyurtma berilganda `sold` hisoblagich
+        F() expression orqali to'g'ri yig'ilishini tekshiradi.
+
+        MUHIM: Bu test faqat F() logikasini tekshiradi — haqiqiy concurrent
+        race condition SQLite'da simulyatsiya qilinmaydi (select_for_update
+        SQLite'da no-op). PostgreSQL'da TransactionTestCase + threading bilan
+        haqiqiy concurrent test yozish mumkin (keyingi bosqich).
+        """
+        b1 = catalog_setup['b1']
+        initial_sold = b1.sold
+
+        # 1-buyurtma: 2 dona b1
+        cart = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=cart, book=b1, quantity=2)
+        res1 = auth_client.post('/api/v1/orders/', {
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Naqd',
+        }, format='json')
+        assert res1.status_code == status.HTTP_201_CREATED
+
+        b1.refresh_from_db()
+        assert b1.sold == initial_sold + 2
+
+        # 2-buyurtma: yana 3 dona b1 (user savati saqlangan, lekin uning items lari tozalangan)
+        cart2, _ = Cart.objects.get_or_create(user=user)
+        CartItem.objects.create(cart=cart2, book=b1, quantity=3)
+        res2 = auth_client.post('/api/v1/orders/', {
+            'delivery_option_id': 1,
+            'address': {'city': 'Samarkand'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res2.status_code == status.HTTP_201_CREATED
+
+        b1.refresh_from_db()
+        assert b1.sold == initial_sold + 2 + 3  # F() kumulyativ qo'shadi

@@ -1,3 +1,10 @@
+"""
+DIQQAT / OGOHLANTIRISH:
+Ushbu skript FAQAT lokal/staging muhitida PostgreSQL concurrency va
+row-level locking (select_for_update) mexanizmini tekshirish uchun mo'ljallangan.
+Haqiqiy PRODUCTION ma'lumotlar bazasida ISHLATILMASIN!
+"""
+
 import os
 import sys
 import threading

@@ -80,8 +80,8 @@ class TestGoogleOAuthFlow:
 
     @patch('social_auth.views.google_service.exchange_code_for_tokens')
     @patch('social_auth.views.google_service.verify_id_token')
-    def test_google_callback_existing_password_user_logs_in(self, mock_verify, mock_exchange, api_client, caplog):
-        # User already exists with a usable password
+    def test_google_callback_existing_password_user_blocked_409(self, mock_verify, mock_exchange, api_client, caplog):
+        """Parolli mavjud hisob Google OAuth orqali kirganda 409 bilan to'xtatilishi kerak."""
         user = User.objects.create_user(
             username='existing_user',
             email='existing@example.com',
@@ -99,13 +99,14 @@ class TestGoogleOAuthFlow:
             'family_name': 'User',
         }
 
-        with caplog.at_level('INFO'):
+        with caplog.at_level('WARNING'):
             res = api_client.get('/api/auth/google/callback/?code=good_code&state=valid_state_3')
-            assert res.status_code == status.HTTP_302_FOUND
-            assert 'parolli mavjud hisobga Google orqali kirildi' in caplog.text
+            assert res.status_code == status.HTTP_409_CONFLICT
+            assert 'unverified-password hisobga ulanish urinishi' in caplog.text
 
+        # Login bo'lmagan — parol o'zgarmagan
         user.refresh_from_db()
-        assert user.has_usable_password()  # Password remains intact
+        assert user.has_usable_password()
 
     @patch('social_auth.views.google_service.exchange_code_for_tokens')
     @patch('social_auth.views.google_service.verify_id_token')

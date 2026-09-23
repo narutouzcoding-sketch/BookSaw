@@ -93,8 +93,16 @@ class GoogleCallbackView(APIView):
             created = True
 
         if not created and user.has_usable_password():
-            logger.info(
-                "Google OAuth: parolli mavjud hisobga Google orqali kirildi: %s", email
+            logger.warning(
+                "Google OAuth: unverified-password hisobga ulanish urinishi: %s", email
+            )
+            return Response(
+                {
+                    "detail": "Bu email allaqachon parol bilan ro'yxatdan o'tgan. "
+                    "Google orqali ulash uchun avval profilingizga kirib, "
+                    "hisobingizni tasdiqlang yoki administratorga murojaat qiling."
+                },
+                status=409,
             )
 
         old_session_key = request.session.session_key

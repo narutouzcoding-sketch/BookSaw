@@ -296,8 +296,16 @@ class TestPromoAPI:
             code='LIMITED', type='percent', value=10, min_order=Decimal('0.00'),
             usage_limit=1, used_count=1
         )
-        res = api_client.post('/api/v1/promo/validate/', {'code': 'LIMITED', 'subtotal': '100000.00'}, format='json')
+    def test_promo_validate_already_used_by_user_fails(self, auth_client, user):
+        PromoCode.objects.create(code='ONCE', type='percent', value=10, min_order=Decimal('50000.00'))
+        # Create an existing active order for this user with ONCE promo
+        Order.objects.create(
+            user=user, subtotal=Decimal('100000.00'), total=Decimal('90000.00'),
+            promo_code='ONCE', status='processing'
+        )
+        res = auth_client.post('/api/v1/promo/validate/', {'code': 'ONCE', 'subtotal': '100000.00'}, format='json')
         assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'allaqachon foydalangansiz' in res.data['detail']
 
 
 # ===========================================================================
@@ -468,3 +476,91 @@ class TestOrdersAPI:
         }, format='json')
         assert res_empty.status_code == status.HTTP_400_BAD_REQUEST
         assert 'omborda mavjud emas' in res_empty.data['detail']
+
+    def test_order_promo_single_use_per_user_blocked(self, auth_client, user, catalog_setup):
+        """Foydalanuvchi bir xil promo-kodni 2-marta ishlata olmasligi kerak."""
+        b1 = catalog_setup['b1']
+        PromoCode.objects.create(code='SPECIAL', type='percent', value=15, min_order=Decimal('50000.00'))
+
+        # 1-buyurtma: SPECIAL kodi bilan -> 201
+        cart = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=cart, book=b1, quantity=1)
+        res1 = auth_client.post('/api/v1/orders/', {
+            'promo_code': 'SPECIAL',
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res1.status_code == status.HTTP_201_CREATED
+
+        # 2-buyurtma: yana xuddi shu SPECIAL kodi bilan -> 400
+        cart2, _ = Cart.objects.get_or_create(user=user)
+        CartItem.objects.create(cart=cart2, book=b1, quantity=1)
+        res2 = auth_client.post('/api/v1/orders/', {
+            'promo_code': 'SPECIAL',
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res2.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'allaqachon foydalangansiz' in res2.data['detail']
+
+    def test_order_promo_cancelled_order_allows_reuse(self, auth_client, user, catalog_setup):
+        """Bekor qilingan buyurtmadagi promo-kodni qayta ishlatish mumkin bo'lishi kerak."""
+        b1 = catalog_setup['b1']
+        PromoCode.objects.create(code='RETRY', type='percent', value=10, min_order=Decimal('50000.00'))
+
+        # 1-buyurtma: RETRY kodi bilan
+        cart = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=cart, book=b1, quantity=1)
+        res1 = auth_client.post('/api/v1/orders/', {
+            'promo_code': 'RETRY',
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res1.status_code == status.HTTP_201_CREATED
+
+        # Buyurtma bekor qilindi (status='cancelled')
+        order1 = Order.objects.get(id=res1.data['id'])
+        order1.status = 'cancelled'
+        order1.save()
+
+        # 2-buyurtma: bekor qilingan kodni qayta ishlatish -> 201 Created
+        cart2, _ = Cart.objects.get_or_create(user=user)
+        CartItem.objects.create(cart=cart2, book=b1, quantity=1)
+        res2 = auth_client.post('/api/v1/orders/', {
+            'promo_code': 'RETRY',
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res2.status_code == status.HTTP_201_CREATED
+
+    def test_order_promo_different_user_allowed(self, auth_client, user, user2, api_client, catalog_setup):
+        """Boshqa foydalanuvchi birinchi foydalanuvchi ishlatgan promo-kodni ishlata olishi kerak."""
+        b1 = catalog_setup['b1']
+        PromoCode.objects.create(code='SHARED', type='percent', value=10, min_order=Decimal('50000.00'))
+
+        # User 1 buyurtma qiladi
+        cart1 = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=cart1, book=b1, quantity=1)
+        res1 = auth_client.post('/api/v1/orders/', {
+            'promo_code': 'SHARED',
+            'delivery_option_id': 1,
+            'address': {'city': 'Tashkent'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res1.status_code == status.HTTP_201_CREATED
+
+        # User 2 buyurtma qiladi (xuddi shu kod bilan) -> 201 Created
+        cart2 = Cart.objects.create(user=user2)
+        CartItem.objects.create(cart=cart2, book=b1, quantity=1)
+        api_client.force_login(user2)
+        res2 = api_client.post('/api/v1/orders/', {
+            'promo_code': 'SHARED',
+            'delivery_option_id': 1,
+            'address': {'city': 'Samarkand'},
+            'payment_method': 'Click',
+        }, format='json')
+        assert res2.status_code == status.HTTP_201_CREATED

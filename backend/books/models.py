@@ -212,6 +212,13 @@ class Order(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'promo_code'],
+                condition=~models.Q(promo_code='') & ~models.Q(status='cancelled'),
+                name='unique_active_user_promo_code',
+            )
+        ]
 
     def __str__(self):
         return f'Order #{self.pk} by {self.user}'

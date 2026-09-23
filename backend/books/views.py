@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Avg, Count, F, Q, Value
 from django.db.models.functions import Coalesce
 from rest_framework import generics, permissions, status, viewsets
@@ -328,6 +328,15 @@ class PromoValidateView(APIView):
         code = ser.validated_data['code'].strip().upper()
         subtotal = ser.validated_data['subtotal']
 
+        if request.user.is_authenticated:
+            if Order.objects.filter(
+                user=request.user, promo_code=code
+            ).exclude(status='cancelled').exists():
+                return Response(
+                    {'detail': 'Siz ushbu promo-koddan allaqachon foydalangansiz.'},
+                    status=400,
+                )
+
         try:
             promo = PromoCode.objects.get(code=code)
         except PromoCode.DoesNotExist:
@@ -387,105 +396,124 @@ class OrderListCreateView(generics.ListCreateAPIView):
         ser.is_valid(raise_exception=True)
         data = ser.validated_data
 
-        with transaction.atomic():
-            # 1. Get user's cart
-            try:
-                cart = Cart.objects.prefetch_related('items', 'items__book').get(
-                    user=request.user
-                )
-            except Cart.DoesNotExist:
-                return Response({'detail': 'Savat topilmadi.'}, status=400)
-
-            cart_items = list(cart.items.select_related('book').all())
-            if not cart_items:
-                return Response({'detail': "Savat bo'sh."}, status=400)
-
-            # 2. Lock Book rows to prevent concurrent race conditions.
-            #    order_by('pk') prevents deadlocks when multiple transactions
-            #    lock the same books in different order.
-            book_ids = [ci.book_id for ci in cart_items]
-            books = {
-                b.pk: b
-                for b in Book.objects.select_for_update().filter(pk__in=book_ids).order_by('pk')
-            }
-
-            # 3. Check stock using locked book instances (not stale ci.book)
-            for ci in cart_items:
-                book = books[ci.book_id]
-                if not book.in_stock or book.stock_quantity <= 0:
-                    return Response(
-                        {'detail': f'"{book.title}" omborda mavjud emas.'},
-                        status=400,
-                    )
-                if book.stock_quantity < ci.quantity:
-                    return Response(
-                        {'detail': f'"{book.title}" uchun omborda yetarli zaxira yo\'q (qoldiq: {book.stock_quantity} ta).'},
-                        status=400,
-                    )
-
-            # 4. Server-side price calculation using locked book prices
-            subtotal = sum(books[ci.book_id].price * ci.quantity for ci in cart_items)
-
-            # 5. Promo
-            discount = Decimal('0')
-            promo_code_str = data.get('promo_code', '').strip().upper()
-            applied_promo = None
-            if promo_code_str:
+        try:
+            with transaction.atomic():
+                # 1. Get user's cart
                 try:
-                    promo = PromoCode.objects.select_for_update().get(code=promo_code_str)
-                    if promo.is_valid() and subtotal >= promo.min_order:
-                        applied_promo = promo
-                        if promo.type == 'percent':
-                            discount = (subtotal * promo.value / 100).quantize(Decimal('1'))
-                        promo.used_count += 1
-                        promo.save(update_fields=['used_count'])
-                except PromoCode.DoesNotExist:
-                    pass  # invalid promo silently ignored during order
+                    cart = Cart.objects.prefetch_related('items', 'items__book').get(
+                        user=request.user
+                    )
+                except Cart.DoesNotExist:
+                    return Response({'detail': 'Savat topilmadi.'}, status=400)
 
-            # 6. Delivery cost
-            delivery_id = data.get('delivery_option_id', 1)
-            delivery_cost = DELIVERY_PRICES.get(delivery_id, Decimal('15000'))
+                cart_items = list(cart.items.select_related('book').all())
+                if not cart_items:
+                    return Response({'detail': "Savat bo'sh."}, status=400)
 
-            # Free shipping promo (use already-fetched promo, no second query)
-            if applied_promo and applied_promo.type == 'freeShipping':
-                delivery_cost = Decimal('0')
+                # 2. Lock Book rows to prevent concurrent race conditions.
+                #    order_by('pk') prevents deadlocks when multiple transactions
+                #    lock the same books in different order.
+                book_ids = [ci.book_id for ci in cart_items]
+                books = {
+                    b.pk: b
+                    for b in Book.objects.select_for_update().filter(pk__in=book_ids).order_by('pk')
+                }
 
-            total = max(Decimal('0'), subtotal - discount + delivery_cost)
+                # 3. Check stock using locked book instances (not stale ci.book)
+                for ci in cart_items:
+                    book = books[ci.book_id]
+                    if not book.in_stock or book.stock_quantity <= 0:
+                        return Response(
+                            {'detail': f'"{book.title}" omborda mavjud emas.'},
+                            status=400,
+                        )
+                    if book.stock_quantity < ci.quantity:
+                        return Response(
+                            {'detail': f'"{book.title}" uchun omborda yetarli zaxira yo\'q (qoldiq: {book.stock_quantity} ta).'},
+                            status=400,
+                        )
 
-            # 7. Create order
-            order = Order.objects.create(
-                user=request.user,
-                subtotal=subtotal,
-                discount=discount,
-                delivery_cost=delivery_cost,
-                total=total,
-                promo_code=promo_code_str,
-                address_snapshot=data.get('address', {}),
-                payment_method=data.get('payment_method', ''),
+                # 4. Server-side price calculation using locked book prices
+                subtotal = sum(books[ci.book_id].price * ci.quantity for ci in cart_items)
+
+                # 5. Promo
+                discount = Decimal('0')
+                promo_code_str = data.get('promo_code', '').strip().upper()
+                applied_promo = None
+                if promo_code_str:
+                    # 5a. 1 foydalanuvchi - 1 marta cheklovi (bekor qilingan buyurtmalar bundan mustasno)
+                    if Order.objects.filter(
+                        user=request.user,
+                        promo_code=promo_code_str,
+                    ).exclude(status='cancelled').exists():
+                        return Response(
+                            {'detail': 'Siz ushbu promo-koddan allaqachon foydalangansiz.'},
+                            status=400,
+                        )
+
+                    try:
+                        promo = PromoCode.objects.select_for_update().get(code=promo_code_str)
+                        if promo.is_valid() and subtotal >= promo.min_order:
+                            applied_promo = promo
+                            if promo.type == 'percent':
+                                discount = (subtotal * promo.value / 100).quantize(Decimal('1'))
+                            PromoCode.objects.filter(pk=promo.pk).update(
+                                used_count=F('used_count') + 1
+                            )
+                    except PromoCode.DoesNotExist:
+                        pass  # invalid promo silently ignored during order
+
+                # 6. Delivery cost
+                delivery_id = data.get('delivery_option_id', 1)
+                delivery_cost = DELIVERY_PRICES.get(delivery_id, Decimal('15000'))
+
+                # Free shipping promo (use already-fetched promo, no second query)
+                if applied_promo and applied_promo.type == 'freeShipping':
+                    delivery_cost = Decimal('0')
+
+                total = max(Decimal('0'), subtotal - discount + delivery_cost)
+
+                # 7. Create order
+                order = Order.objects.create(
+                    user=request.user,
+                    subtotal=subtotal,
+                    discount=discount,
+                    delivery_cost=delivery_cost,
+                    total=total,
+                    promo_code=promo_code_str,
+                    address_snapshot=data.get('address', {}),
+                    payment_method=data.get('payment_method', ''),
+                )
+
+                # 8. Create order items + update sold and stock counts atomically
+                for ci in cart_items:
+                    book = books[ci.book_id]
+                    OrderItem.objects.create(
+                        order=order,
+                        book=book,
+                        title=book.title,
+                        price=book.price,
+                        quantity=ci.quantity,
+                        image=book.image,
+                    )
+                    # F() generates SQL: UPDATE ... SET sold = sold + N, stock_quantity = stock_quantity - N
+                    # This is atomic — prevents overselling and race conditions.
+                    Book.objects.filter(pk=book.pk).update(
+                        sold=F('sold') + ci.quantity,
+                        stock_quantity=F('stock_quantity') - ci.quantity,
+                    )
+                    # Auto-toggle in_stock to False if stock reaches 0
+                    Book.objects.filter(pk=book.pk, stock_quantity__lte=0).update(in_stock=False)
+
+                # 9. Clear cart
+                cart.items.all().delete()
+        except IntegrityError:
+            # Ikki parallel so'rov bir vaqtda kelsa, DB darajasidagi UniqueConstraint
+            # (unique_active_user_promo_code) IntegrityError qaytaradi.
+            return Response(
+                {'detail': 'Siz ushbu promo-koddan allaqachon foydalangansiz.'},
+                status=400,
             )
-
-            # 8. Create order items + update sold and stock counts atomically
-            for ci in cart_items:
-                book = books[ci.book_id]
-                OrderItem.objects.create(
-                    order=order,
-                    book=book,
-                    title=book.title,
-                    price=book.price,
-                    quantity=ci.quantity,
-                    image=book.image,
-                )
-                # F() generates SQL: UPDATE ... SET sold = sold + N, stock_quantity = stock_quantity - N
-                # This is atomic — prevents overselling and race conditions.
-                Book.objects.filter(pk=book.pk).update(
-                    sold=F('sold') + ci.quantity,
-                    stock_quantity=F('stock_quantity') - ci.quantity,
-                )
-                # Auto-toggle in_stock to False if stock reaches 0
-                Book.objects.filter(pk=book.pk, stock_quantity__lte=0).update(in_stock=False)
-
-            # 9. Clear cart
-            cart.items.all().delete()
 
         # Reload order with items for response
         order = Order.objects.prefetch_related('items', 'items__book').get(pk=order.pk)

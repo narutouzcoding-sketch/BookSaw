@@ -236,10 +236,11 @@ class CartView(APIView):
     @extend_schema(request=CartDeleteSerializer, responses={200: CartSerializer})
     def delete(self, request):
         cart = _get_or_create_cart(request)
-        if request.data.get('clear'):
+        clear = (request.data.get('clear') if hasattr(request, 'data') and request.data else None) or request.query_params.get('clear')
+        if clear and str(clear).lower() in ('true', '1'):
             cart.items.all().delete()
         else:
-            book_id = request.data.get('book_id')
+            book_id = (request.data.get('book_id') if hasattr(request, 'data') and request.data else None) or request.query_params.get('book_id')
             if not book_id:
                 return Response({'detail': 'book_id yoki clear majburiy.'}, status=400)
             CartItem.objects.filter(cart=cart, book_id=book_id).delete()
@@ -301,7 +302,7 @@ class WishlistView(APIView):
 
     @extend_schema(request=WishlistAddSerializer, responses={200: WishlistItemSerializer(many=True)})
     def delete(self, request):
-        book_id = request.data.get('book_id')
+        book_id = (request.data.get('book_id') if hasattr(request, 'data') and request.data else None) or request.query_params.get('book_id')
         if not book_id:
             return Response({'detail': 'book_id majburiy.'}, status=400)
 

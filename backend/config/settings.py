@@ -151,6 +151,16 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/min',
+        'user': '1000/min',
+        'oauth_start': '10/min',
+        'oauth_callback': '20/min',
+    },
 }
 
 SPECTACULAR_SETTINGS = {

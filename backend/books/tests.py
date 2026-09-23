@@ -564,3 +564,30 @@ class TestOrdersAPI:
             'payment_method': 'Click',
         }, format='json')
         assert res2.status_code == status.HTTP_201_CREATED
+
+    def test_order_promo_integrity_error_race_returns_clean_400(self, auth_client, user, catalog_setup):
+        """
+        Agar parallel so'rovlar .exists() tekshiruvidan bir vaqtda o'tib ketib,
+        database UniqueConstraint darajasida IntegrityError keltirib chiqarsa,
+        server 500 emas, toza va tushunarli 400 xatosi qaytarishi shart.
+        """
+        from unittest.mock import patch
+        from django.db import IntegrityError
+
+        b1 = catalog_setup['b1']
+        PromoCode.objects.create(code='RACEPROMO', type='percent', value=10, min_order=Decimal('50000.00'))
+
+        cart = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=cart, book=b1, quantity=1)
+
+        # Order.objects.create chaqirilganda IntegrityError tashlaymiz (race condition simulyatsiyasi)
+        with patch('books.views.Order.objects.create', side_effect=IntegrityError('unique_active_user_promo_code constraint failed')):
+            res = auth_client.post('/api/v1/orders/', {
+                'promo_code': 'RACEPROMO',
+                'delivery_option_id': 1,
+                'address': {'city': 'Tashkent'},
+                'payment_method': 'Click',
+            }, format='json')
+
+            assert res.status_code == status.HTTP_400_BAD_REQUEST
+            assert res.data['detail'] == 'Siz ushbu promo-koddan allaqachon foydalangansiz.'

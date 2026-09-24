@@ -137,6 +137,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5500",  # VSCode Live Server standart porti
+    "http://localhost:3344",  # Playwright E2E browser test porti
+    "http://127.0.0.1:3344",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
@@ -150,6 +152,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5500",
+    "http://localhost:3344",
+    "http://127.0.0.1:3344",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]

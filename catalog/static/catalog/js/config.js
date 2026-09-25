@@ -7,7 +7,7 @@
  * 3. api.js dagi endpointlar o'sha prefix ostida chaqiladi
  */
 window.APP_CONFIG = {
-  API_BASE: "http://127.0.0.1:8000/api/v1",
+  API_BASE: "https://booksaw-api.onrender.com/api/v1",
   USE_MOCK: false,
   CURRENCY: "so'm",
   FREE_SHIPPING_FROM: 200000,

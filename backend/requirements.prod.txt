@@ -1,0 +1,27 @@
+# ==============================================================================
+# BooksCatalog (Booksaw) — Production Dependencies
+# ==============================================================================
+# Install: pip install -r requirements.prod.txt
+# ==============================================================================
+
+# Core
+Django>=6.0,<7.0
+psycopg2-binary>=2.9,<3.0
+python-dotenv>=1.0,<2.0
+
+# REST API
+djangorestframework>=3.15,<4.0
+django-filter>=24.0,<25.0
+django-cors-headers>=4.0,<5.0
+drf-spectacular>=0.27,<1.0
+
+# Production server
+gunicorn>=22.0,<27.0
+whitenoise>=6.0,<7.0
+
+# Google OAuth
+google-auth>=2.0,<3.0
+google-api-python-client>=2.0,<3.0
+PyJWT>=2.0,<3.0
+cryptography>=40.0,<50.0
+requests>=2.30,<3.0

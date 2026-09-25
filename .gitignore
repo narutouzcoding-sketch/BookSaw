@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+staticfiles/
 .aider*
 node_modules/
 dist/

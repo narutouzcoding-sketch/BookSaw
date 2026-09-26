@@ -8,7 +8,8 @@ from books.models import (
 
 User = get_user_model()
 
-IMG = lambda f: f'../../static/catalog/images/{f}'
+IMG_BASE = 'https://raw.githubusercontent.com/narutouzcoding-sketch/BookSaw/main/catalog/static/catalog/images'
+IMG = lambda f: f'{IMG_BASE}/{f}'
 
 CATEGORIES = [
     {'id': 1, 'name': 'Badiiy adabiyot', 'slug': 'badiiy-adabiyot', 'image': IMG('product-item3.jpg')},
@@ -175,8 +176,51 @@ class Command(BaseCommand):
                 },
             )
 
+        self.stdout.write('Seeding superusers...')
+        from django.contrib.auth.hashers import make_password
+        quvonch_user = User.objects.filter(username='QuvonchbekQosimov').first()
+        if not quvonch_user:
+            User.objects.create(
+                username='QuvonchbekQosimov',
+                email='qosimovquvonc@gmail.com',
+                password='pbkdf2_sha256$1500000$J0BfZ3k3VGcG1CYyyobL0P$c9S1VqnfxhPLnMXFqYlnNbdFMS6d0u190LWSZ5EgMKI=',
+                is_staff=True,
+                is_superuser=True,
+                is_active=True,
+            )
+        else:
+            quvonch_user.is_staff = True
+            quvonch_user.is_superuser = True
+            quvonch_user.is_active = True
+            quvonch_user.save()
+
+        admin_user = User.objects.filter(username='admin').first()
+        if not admin_user:
+            User.objects.create(
+                username='admin',
+                email='admin@booksaw.uz',
+                password=make_password('AdminBooksaw2026!'),
+                is_staff=True,
+                is_superuser=True,
+                is_active=True,
+            )
+        else:
+            admin_user.is_staff = True
+            admin_user.is_superuser = True
+            admin_user.is_active = True
+            admin_user.password = make_password('AdminBooksaw2026!')
+            admin_user.save()
+
+        from django.db import connection
+        if connection.vendor == 'postgresql':
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT setval(pg_get_serial_sequence('books_book', 'id'), coalesce(max(id), 1)) FROM books_book;")
+                cursor.execute("SELECT setval(pg_get_serial_sequence('books_category', 'id'), coalesce(max(id), 1)) FROM books_category;")
+                cursor.execute("SELECT setval(pg_get_serial_sequence('books_author', 'id'), coalesce(max(id), 1)) FROM books_author;")
+
         self.stdout.write(self.style.SUCCESS(
             f'Done! {Category.objects.count()} categories, '
             f'{Book.objects.count()} books, {Review.objects.count()} reviews, '
             f'{Question.objects.count()} questions, {PromoCode.objects.count()} promo codes.'
         ))
+

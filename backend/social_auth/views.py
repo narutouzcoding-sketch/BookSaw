@@ -120,12 +120,16 @@ class GoogleCallbackView(APIView):
 import os
 import secrets
 import requests
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from .models import TelegramOTP
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class TelegramSendOTPView(APIView):
     """POST /api/auth/telegram/send-otp/ - sends 6-digit code via Telegram Bot."""
     permission_classes = []
+    authentication_classes = []
 
     def post(self, request):
         phone = request.data.get('phone', '').strip()
@@ -169,9 +173,11 @@ class TelegramSendOTPView(APIView):
         })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class TelegramVerifyOTPView(APIView):
     """POST /api/auth/telegram/verify-otp/ - verifies OTP and logs user in."""
     permission_classes = []
+    authentication_classes = []
 
     def post(self, request):
         phone = request.data.get('phone', '').strip()

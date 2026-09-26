@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from rest_framework import permissions, serializers as drf_serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -158,10 +158,11 @@ from .models import EmailVerificationCode, User
 logger = logging.getLogger(__name__)
 
 
-@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class SendEmailCodeView(APIView):
     """POST /api/v1/auth/email/send-code/ - sends 6-digit confirmation code to email."""
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         email = request.data.get('email', '').strip().lower()
@@ -210,10 +211,11 @@ class SendEmailCodeView(APIView):
         return Response(resp, status=status.HTTP_200_OK)
 
 
-@method_decorator(csrf_protect, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailCodeView(APIView):
     """POST /api/v1/auth/email/verify-code/ - verifies 6-digit code."""
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         email = request.data.get('email', '').strip().lower()

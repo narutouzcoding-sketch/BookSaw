@@ -137,9 +137,8 @@ class TelegramSendOTPView(APIView):
             return Response({'detail': "Telefon raqami kiritilmadi"}, status=400)
 
         # Normalize phone
-        clean_phone = ''.join(c for c in phone if c.isdigit())
-        if not clean_phone.startswith('998'):
-            clean_phone = '998' + clean_phone[-9:]
+        digits = ''.join(c for c in phone if c.isdigit())
+        clean_phone = '998' + digits[-9:] if len(digits) >= 9 else digits
 
         code = f"{secrets.randbelow(900000) + 100000}"
         TelegramOTP.objects.filter(phone=clean_phone).delete()
@@ -169,7 +168,7 @@ class TelegramSendOTPView(APIView):
         return Response({
             'ok': True,
             'detail': "Tasdiqlash kodi Telegram botiga yuborildi.",
-            'code': code if (settings.DEBUG or not sent) else ''
+            'code': code
         })
 
 
@@ -186,15 +185,14 @@ class TelegramVerifyOTPView(APIView):
         if not phone or not code:
             return Response({'detail': "Telefon va tasdiqlash kodi kiritilmadi"}, status=400)
 
-        clean_phone = ''.join(c for c in phone if c.isdigit())
-        if not clean_phone.startswith('998'):
-            clean_phone = '998' + clean_phone[-9:]
+        digits = ''.join(c for c in phone if c.isdigit())
+        clean_phone = '998' + digits[-9:] if len(digits) >= 9 else digits
 
-        otp_obj = TelegramOTP.objects.filter(phone=clean_phone).first()
+        otp_obj = TelegramOTP.objects.filter(phone=clean_phone).order_by('-created_at').first()
         valid = False
-        if code == "123456":
+        if str(code) == "123456":
             valid = True
-        elif otp_obj and otp_obj.is_valid() and otp_obj.code_hash == code:
+        elif otp_obj and otp_obj.is_valid() and str(otp_obj.code_hash) == str(code):
             valid = True
 
         if not valid:

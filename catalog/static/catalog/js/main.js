@@ -45,7 +45,15 @@ import {
 /* ========================================================================
    14. PAGE INITIALIZATION
    ======================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Backend rejimida (USE_MOCK: false) bu yerda haqiqiy so'rov ketadi va
+  // window.PRODUCTS / window.CATEGORIES backend natijasi bilan almashtiriladi.
+  // Mock rejimida yoki xatolik bo'lsa, funksiya darhol qaytadi va data.js
+  // dagi statik massivlar ishlatilaveradi — sahifa hech qachon "osilib qolmaydi".
+  if (window.Api && window.Api.bootstrapData) {
+    await window.Api.bootstrapData();
+  }
+
   Theme.mount();
   initHeader();
   UI.updateBadges();

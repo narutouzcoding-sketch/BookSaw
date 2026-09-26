@@ -147,7 +147,7 @@
         description: raw.description || '',
         variants: raw.variants || null,
         storeId: raw.store_id || raw.storeId || 1,
-        year: raw.year || 2023,
+        year: raw.year || raw.published_year || 2023,
         pages: raw.pages || 0,
         isbn: raw.isbn || '',
         publisher: raw.publisher || '',
@@ -688,6 +688,41 @@
       const route = provider === 'google' ? (window.APP_CONFIG && APP_CONFIG.AUTH_GOOGLE_START) : (window.APP_CONFIG && APP_CONFIG.AUTH_TELEGRAM_START);
       if (this.isMock()) throw new Error("Ijtimoiy kirish server sozlangandan keyin ishlaydi.");
       return route;
+    },
+
+    /**
+     * Sahifa yuklanishida backenddan haqiqiy mahsulot va kategoriyalarni olib,
+     * global window.PRODUCTS / window.CATEGORIES massivlariga joylaydi.
+     * Shundan keyin butun sayt (main.js, products.js, commerce.js) hech qanday
+     * o'zgarishsiz, xuddi hozirgidek sinxron tarzda ishlashda davom etadi —
+     * ular ma'lumot qayerdan (mock yoki backend) kelganini bilishlari shart emas.
+     *
+     * Mock rejimida (USE_MOCK: true) bu funksiya hech narsa qilmaydi, chunki
+     * PRODUCTS/CATEGORIES allaqachon data.js orqali to'g'ridan-to'g'ri mavjud.
+     */
+    async bootstrapData() {
+      if (this.isMock()) return;
+
+      // Mahsulotlar va kategoriyalar bir-biriga bog'liq emas — shuning uchun
+      // alohida try/catch ichiga olindi: agar kategoriyalar endpointi hali
+      // ishlamasa ham, mahsulotlar baribir yuklanadi (va aksincha).
+      try {
+        const productsRes = await this.getProducts({}, { noDelay: true });
+        if (Array.isArray(productsRes.results)) {
+          window.PRODUCTS = productsRes.results;
+        }
+      } catch (err) {
+        console.error('Mahsulotlarni backenddan yuklashda xatolik, eski/mock PRODUCTS qoladi:', err);
+      }
+
+      try {
+        const categoriesRes = await this.getCategories({ noDelay: true });
+        if (Array.isArray(categoriesRes.results) && categoriesRes.results.length) {
+          window.CATEGORIES = categoriesRes.results;
+        }
+      } catch (err) {
+        console.error('Kategoriyalarni backenddan yuklashda xatolik, eski/mock CATEGORIES qoladi:', err);
+      }
     }
   };
 

@@ -1,10 +1,8 @@
 import logging
 import os
-import smtplib
 import requests
 from django.conf import settings
-from django.core.mail import EmailMessage, get_connection
-from django.core.mail.backends.smtp import EmailBackend
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 
@@ -14,12 +12,11 @@ def send_platform_email(recipient_email: str, subject: str, message_text: str) -
     Sends email to recipient via:
     1. Resend API (HTTPS port 443) - if RESEND_API_KEY is configured
     2. Brevo API (HTTPS port 443) - if BREVO_API_KEY is configured
-    3. Django configured SMTP (port 587 TLS or port 465 SSL)
+    3. Django configured mailer (via MAILERS['default'])
     Returns (success: bool, info_or_error: str)
     """
     recipient_email = recipient_email.strip().lower()
-    host_user = getattr(settings, 'EMAIL_HOST_USER', os.getenv('EMAIL_HOST_USER', '')).strip()
-    host_password = getattr(settings, 'EMAIL_HOST_PASSWORD', os.getenv('EMAIL_HOST_PASSWORD', '')).replace(' ', '').strip()
+    host_user = os.getenv('EMAIL_HOST_USER', '').strip()
 
     # Determine sender address (Gmail strictly requires sender == authenticated user)
     if host_user and '@' in host_user:
@@ -27,7 +24,7 @@ def send_platform_email(recipient_email: str, subject: str, message_text: str) -
     else:
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Booksaw <noreply@booksaw.uz>')
 
-    # 1. Resend API (HTTPS, no port blocking)
+    # 1. Resend API (HTTPS port 443, never blocked)
     resend_key = os.getenv('RESEND_API_KEY', '').strip()
     if resend_key:
         try:
@@ -50,7 +47,7 @@ def send_platform_email(recipient_email: str, subject: str, message_text: str) -
         except Exception as e:
             logger.warning("Resend API exception: %s", e)
 
-    # 2. Brevo API (HTTPS, no port blocking)
+    # 2. Brevo API (HTTPS port 443, never blocked)
     brevo_key = os.getenv('BREVO_API_KEY', '').strip()
     if brevo_key:
         try:
@@ -73,67 +70,20 @@ def send_platform_email(recipient_email: str, subject: str, message_text: str) -
         except Exception as e:
             logger.warning("Brevo API exception: %s", e)
 
-    # 3. SMTP attempt (port 587 STARTTLS)
-    if host_user and host_password:
-        # Try port 587 with TLS
-        try:
-            conn587 = EmailBackend(
-                host=getattr(settings, 'EMAIL_HOST', 'smtp.gmail.com'),
-                port=587,
-                username=host_user,
-                password=host_password,
-                use_tls=True,
-                use_ssl=False,
-                timeout=8,
-            )
-            msg = EmailMessage(
-                subject=subject,
-                body=message_text,
-                from_email=from_email,
-                to=[recipient_email],
-                connection=conn587,
-            )
-            if msg.send(fail_silently=False) > 0:
-                logger.info("Email sent via SMTP port 587 to %s", recipient_email)
-                return True, "SMTP (587 TLS) orqali yuborildi"
-        except Exception as err587:
-            logger.warning("SMTP port 587 failed: %s. Trying port 465 SSL...", err587)
-            # Try port 465 with SSL
-            try:
-                conn465 = EmailBackend(
-                    host=getattr(settings, 'EMAIL_HOST', 'smtp.gmail.com'),
-                    port=465,
-                    username=host_user,
-                    password=host_password,
-                    use_tls=False,
-                    use_ssl=True,
-                    timeout=8,
-                )
-                msg465 = EmailMessage(
-                    subject=subject,
-                    body=message_text,
-                    from_email=from_email,
-                    to=[recipient_email],
-                    connection=conn465,
-                )
-                if msg465.send(fail_silently=False) > 0:
-                    logger.info("Email sent via SMTP port 465 to %s", recipient_email)
-                    return True, "SMTP (465 SSL) orqali yuborildi"
-            except Exception as err465:
-                logger.error("SMTP port 465 also failed: %s", err465)
-                return False, f"SMTP xatosi: 587: {err587} | 465: {err465}"
-
-    # 4. Fallback to default Django mailer (e.g. console in tests or default connection)
+    # 3. Standard Django Mailer (uses MAILERS['default'])
     try:
-        from django.core.mail import send_mail
-        send_mail(
+        sent_count = send_mail(
             subject=subject,
             message=message_text,
             from_email=from_email,
             recipient_list=[recipient_email],
             fail_silently=False,
         )
-        return True, "Django default mailer orqali yuborildi"
+        if sent_count > 0:
+            logger.info("Email sent successfully via Django MAILERS to %s", recipient_email)
+            return True, "Django MAILERS orqali muvaffaqiyatli yuborildi"
+        else:
+            return False, "Email yuborilmadi (sent_count = 0)"
     except Exception as e:
-        logger.warning("Django default send_mail failed: %s", e)
+        logger.warning("Django send_mail failed: %s", e)
         return False, str(e)

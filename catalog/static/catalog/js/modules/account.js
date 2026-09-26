@@ -367,11 +367,18 @@ const Auth = {
 
         if (noticeEl) {
           noticeEl.innerHTML = res && res.code
-            ? `Tiklash kodi yuborildi. (Sinov uchun kod: <strong>${res.code}</strong>)`
+            ? `Tiklash kodi tayyorlandi. (Sinov uchun kod: <strong>${res.code}</strong>)`
             : `Tiklash kodi <strong>${email}</strong> pochtasiga yuborildi. Pochtani tekshiring.`;
         }
-        UI.showToast("Tiklash kodi emailingizga yuborildi!", "success");
-        document.getElementById('forgotCode')?.focus();
+        if (res && res.code) {
+          const codeInput = document.getElementById('forgotCode');
+          if (codeInput) codeInput.value = res.code;
+          UI.showToast(`Tiklash kodi tayyorlandi (${res.code})`, "success");
+          document.getElementById('forgotNewPass')?.focus();
+        } else {
+          UI.showToast("Tiklash kodi emailingizga yuborildi!", "success");
+          document.getElementById('forgotCode')?.focus();
+        }
       } catch (err) {
         send.disabled = false;
         send.textContent = 'Kodni olish';

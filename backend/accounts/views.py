@@ -187,18 +187,10 @@ class SendEmailCodeView(APIView):
         )
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@booksaw.uz')
 
-        email_sent = False
-        try:
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=from_email,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            email_sent = True
-        except Exception as e:
-            logger.warning("Email yuborishda xatolik: %s", e)
+        from .email_service import send_platform_email
+        email_sent, email_info = send_platform_email(email, subject, message)
+        if not email_sent:
+            logger.warning("Email yuborilmadi (%s): %s", email, email_info)
 
         resp = {
             'ok': True,
@@ -207,6 +199,8 @@ class SendEmailCodeView(APIView):
         }
         if getattr(settings, 'DEBUG', False) or not email_sent:
             resp['code'] = code
+            if not email_sent:
+                resp['debug_note'] = email_info
 
         return Response(resp, status=status.HTTP_200_OK)
 
@@ -269,18 +263,10 @@ class PasswordResetRequestView(APIView):
         )
         from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@booksaw.uz')
 
-        email_sent = False
-        try:
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=from_email,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            email_sent = True
-        except Exception as e:
-            logger.warning("Email yuborishda xatolik: %s", e)
+        from .email_service import send_platform_email
+        email_sent, email_info = send_platform_email(email, subject, message)
+        if not email_sent:
+            logger.warning("Password reset email yuborilmadi (%s): %s", email, email_info)
 
         resp = {
             'ok': True,
@@ -289,6 +275,8 @@ class PasswordResetRequestView(APIView):
         }
         if getattr(settings, 'DEBUG', False) or not email_sent:
             resp['code'] = code
+            if not email_sent:
+                resp['debug_note'] = email_info
 
         return Response(resp, status=status.HTTP_200_OK)
 

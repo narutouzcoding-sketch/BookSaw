@@ -244,34 +244,27 @@ SPECTACULAR_SETTINGS = {
 }
 
 # ---------------------------------------------------------------------------
-# Email
+# Email (Django 6 MAILERS)
 # ---------------------------------------------------------------------------
 
-EMAIL_BACKEND = os.getenv(
-    'EMAIL_BACKEND',
-    'django.core.mail.backends.smtp.EmailBackend' if (os.getenv('EMAIL_HOST_USER') or not DEBUG) else 'django.core.mail.backends.console.EmailBackend'
-)
-EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1", "t")
-EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() in ("true", "1", "t")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "Booksaw <noreply@booksaw.uz>")
-EMAIL_TIMEOUT = 10
+_email_user = os.getenv("EMAIL_HOST_USER", "").strip()
+_email_pass = os.getenv("EMAIL_HOST_PASSWORD", "").replace(" ", "").strip()
+_email_host = os.getenv("EMAIL_HOST", "smtp.gmail.com").strip()
+_email_port = int(os.getenv("EMAIL_PORT", "587"))
+_email_tls = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1", "t")
 
 MAILERS = {
     'default': {
-        'BACKEND': EMAIL_BACKEND,
-        'HOST': EMAIL_HOST,
-        'PORT': EMAIL_PORT,
-        'USE_TLS': EMAIL_USE_TLS,
-        'USE_SSL': EMAIL_USE_SSL,
-        'HOST_USER': EMAIL_HOST_USER,
-        'HOST_PASSWORD': EMAIL_HOST_PASSWORD,
-        'TIMEOUT': EMAIL_TIMEOUT,
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend' if (_email_user or not DEBUG) else 'django.core.mail.backends.console.EmailBackend',
+        'HOST': _email_host,
+        'PORT': _email_port,
+        'USE_TLS': _email_tls,
+        'HOST_USER': _email_user,
+        'HOST_PASSWORD': _email_pass,
+        'TIMEOUT': 10,
     }
 }
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", _email_user or "Booksaw <noreply@booksaw.uz>")
 
 # ---------------------------------------------------------------------------
 # OAuth (Google)

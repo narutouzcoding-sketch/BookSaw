@@ -688,6 +688,20 @@
         method: "POST", body: JSON.stringify({ email, code })
       });
     },
+    async requestPasswordReset(email) {
+      if (this.isMock()) return { ok: true, mock: true, code: '123456' };
+      await this.ensureCsrfCookie();
+      return this.request('/auth/password/reset-request/', {
+        method: "POST", body: JSON.stringify({ email })
+      });
+    },
+    async confirmPasswordReset(email, code, new_password) {
+      if (this.isMock()) return { ok: true, mock: true };
+      await this.ensureCsrfCookie();
+      return this.request('/auth/password/reset-confirm/', {
+        method: "POST", body: JSON.stringify({ email, code, new_password })
+      });
+    },
     async sendTelegramOtp(phone) {
       if (this.isMock()) return { ok: true, mock: true };
       await this.ensureCsrfCookie();

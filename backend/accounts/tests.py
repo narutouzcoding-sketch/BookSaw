@@ -244,3 +244,43 @@ class TestEmailVerification:
         assert res.status_code == status.HTTP_400_BAD_REQUEST
         assert 'noto\'g\'ri' in res.data['detail']
 
+
+@pytest.mark.django_db
+class TestPasswordReset:
+    def test_password_reset_request_success(self, api_client, user):
+        res = api_client.post('/api/v1/auth/password/reset-request/', {'email': user.email}, format='json')
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data['ok'] is True
+        from accounts.models import EmailVerificationCode
+        v = EmailVerificationCode.objects.filter(email=user.email).first()
+        assert v is not None
+
+    def test_password_reset_request_not_found(self, api_client):
+        res = api_client.post('/api/v1/auth/password/reset-request/', {'email': 'unknown@example.com'}, format='json')
+        assert res.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_password_reset_confirm_success(self, api_client, user):
+        from accounts.models import EmailVerificationCode
+        EmailVerificationCode.objects.create(email=user.email, code='123456')
+        res = api_client.post('/api/v1/auth/password/reset-confirm/', {
+            'email': user.email,
+            'code': '123456',
+            'new_password': 'BrandNewPassword123!'
+        }, format='json')
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data['ok'] is True
+
+        user.refresh_from_db()
+        assert user.check_password('BrandNewPassword123!')
+
+    def test_password_reset_confirm_wrong_code(self, api_client, user):
+        from accounts.models import EmailVerificationCode
+        EmailVerificationCode.objects.create(email=user.email, code='888888')
+        res = api_client.post('/api/v1/auth/password/reset-confirm/', {
+            'email': user.email,
+            'code': '999999',
+            'new_password': 'BrandNewPassword123!'
+        }, format='json')
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+

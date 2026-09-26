@@ -203,16 +203,36 @@
 
   <!-- Forgot Password Modal -->
   <div class="modal-overlay" id="forgotModal">
-    <div class="modal neu-modal forgot-modal" style="max-width:380px;">
-      <h3 style="font-size:20px;font-weight:700;margin-bottom:6px;">Parolni tiklash</h3>
-      <p style="font-size:13px;margin-bottom:18px;">Emailingizni yozing — tiklash havolasini yuboramiz.</p>
-      <div class="input-group" style="margin-bottom:20px;">
-        <label for="forgotEmail">Email Address</label>
-        <input type="email" class="input-box" id="forgotEmail" placeholder="nomingiz@mail.com">
+    <div class="modal neu-modal forgot-modal" style="max-width:400px;">
+      <!-- Step 1: Request code -->
+      <div id="forgotStep1">
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:6px;">Parolni tiklash</h3>
+        <p style="font-size:13px;margin-bottom:18px;">Emailingizni yozing — 6 xonali tasdiqlash kodini yuboramiz.</p>
+        <div class="input-group" style="margin-bottom:20px;">
+          <label for="forgotEmail">Elektron pochta</label>
+          <input type="email" class="input-box" id="forgotEmail" placeholder="nomingiz@mail.com">
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button type="button" class="btn-submit" id="forgotCancel" style="width:auto;padding:10px 18px;font-size:13px;">Bekor qilish</button>
+          <button type="button" class="btn-submit success" id="forgotSend" style="width:auto;padding:10px 22px;font-size:13px;">Kodni olish</button>
+        </div>
       </div>
-      <div style="display:flex;gap:12px;justify-content:flex-end;">
-        <button type="button" class="btn-submit" id="forgotCancel" style="width:auto;padding:10px 18px;font-size:13px;">Bekor qilish</button>
-        <button type="button" class="btn-submit success" id="forgotSend" style="width:auto;padding:10px 22px;font-size:13px;">Yuborish</button>
+      <!-- Step 2: Confirm code and new password -->
+      <div id="forgotStep2" style="display:none;">
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:6px;">Yangi parol o'rnatish</h3>
+        <p style="font-size:13px;margin-bottom:14px;" id="forgotStep2Notice">Emailingizga yuborilgan 6 xonali kodni va yangi parolni kiriting.</p>
+        <div class="input-group" style="margin-bottom:12px;">
+          <label for="forgotCode">Tasdiqlash kodi</label>
+          <input type="text" class="input-box" id="forgotCode" placeholder="6 xonali kod" maxlength="6">
+        </div>
+        <div class="input-group" style="margin-bottom:20px;">
+          <label for="forgotNewPass">Yangi parol</label>
+          <input type="password" class="input-box" id="forgotNewPass" placeholder="Kamida 6 ta belgi">
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button type="button" class="btn-submit" id="forgotBackBtn" style="width:auto;padding:10px 18px;font-size:13px;">Orqaga</button>
+          <button type="button" class="btn-submit success" id="forgotConfirmBtn" style="width:auto;padding:10px 22px;font-size:13px;">Saqlash va kirish</button>
+        </div>
       </div>
     </div>
   </div>

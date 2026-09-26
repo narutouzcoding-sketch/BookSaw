@@ -247,25 +247,31 @@ SPECTACULAR_SETTINGS = {
 # Email
 # ---------------------------------------------------------------------------
 
-if DEBUG:
-    MAILERS = {
-        'default': {
-            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-        },
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.smtp.EmailBackend' if (os.getenv('EMAIL_HOST_USER') or not DEBUG) else 'django.core.mail.backends.console.EmailBackend'
+)
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1", "t")
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() in ("true", "1", "t")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "Booksaw <noreply@booksaw.uz>")
+EMAIL_TIMEOUT = 10
+
+MAILERS = {
+    'default': {
+        'BACKEND': EMAIL_BACKEND,
+        'HOST': EMAIL_HOST,
+        'PORT': EMAIL_PORT,
+        'USE_TLS': EMAIL_USE_TLS,
+        'USE_SSL': EMAIL_USE_SSL,
+        'HOST_USER': EMAIL_HOST_USER,
+        'HOST_PASSWORD': EMAIL_HOST_PASSWORD,
+        'TIMEOUT': EMAIL_TIMEOUT,
     }
-else:
-    # Production: .env'dan SMTP sozlamalari
-    MAILERS = {
-        'default': {
-            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-            'HOST': os.getenv("EMAIL_HOST", "smtp.gmail.com"),
-            'PORT': int(os.getenv("EMAIL_PORT", "587")),
-            'USE_TLS': True,
-            'HOST_USER': os.getenv("EMAIL_HOST_USER", ""),
-            'HOST_PASSWORD': os.getenv("EMAIL_HOST_PASSWORD", ""),
-        },
-    }
-    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@booksaw.uz")
+}
 
 # ---------------------------------------------------------------------------
 # OAuth (Google)

@@ -330,15 +330,87 @@ const Auth = {
     const open = document.getElementById('forgotPassBtn');
     const cancel = document.getElementById('forgotCancel');
     const send = document.getElementById('forgotSend');
+    const step1 = document.getElementById('forgotStep1');
+    const step2 = document.getElementById('forgotStep2');
+    const backBtn = document.getElementById('forgotBackBtn');
+    const confirmBtn = document.getElementById('forgotConfirmBtn');
+    const noticeEl = document.getElementById('forgotStep2Notice');
+
+    let resetEmail = '';
+
     if (!overlay || !open) return;
-    open.addEventListener('click', () => overlay.classList.add('active'));
+    open.addEventListener('click', () => {
+      if (step1) step1.style.display = 'block';
+      if (step2) step2.style.display = 'none';
+      overlay.classList.add('active');
+      document.getElementById('forgotEmail')?.focus();
+    });
+
     cancel?.addEventListener('click', () => overlay.classList.remove('active'));
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
-    send?.addEventListener('click', () => {
-      const email = document.getElementById('forgotEmail')?.value || '';
-      if (!/\S+@\S+\.\S+/.test(email)) { UI.showToast('Emailni tekshiring', 'error'); return; }
-      overlay.classList.remove('active');
-      UI.showToast('Tiklash havolasi emailga yuborildi');
+
+    send?.addEventListener('click', async () => {
+      const email = (document.getElementById('forgotEmail')?.value || '').trim();
+      if (!/\S+@\S+\.\S+/.test(email)) { UI.showToast("To'g'ri email manzil kiriting", 'error'); return; }
+
+      send.disabled = true;
+      send.textContent = 'Yuborilmoqda...';
+
+      try {
+        resetEmail = email;
+        const res = await window.Api.requestPasswordReset(email);
+        send.disabled = false;
+        send.textContent = 'Kodni olish';
+
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
+
+        if (noticeEl) {
+          noticeEl.innerHTML = res && res.code
+            ? `Tiklash kodi yuborildi. (Sinov uchun kod: <strong>${res.code}</strong>)`
+            : `Tiklash kodi <strong>${email}</strong> pochtasiga yuborildi. Pochtani tekshiring.`;
+        }
+        UI.showToast("Tiklash kodi emailingizga yuborildi!", "success");
+        document.getElementById('forgotCode')?.focus();
+      } catch (err) {
+        send.disabled = false;
+        send.textContent = 'Kodni olish';
+        UI.showToast(err.message || "Email yuborishda xatolik yuz berdi", "error");
+      }
+    });
+
+    backBtn?.addEventListener('click', () => {
+      if (step2) step2.style.display = 'none';
+      if (step1) step1.style.display = 'block';
+    });
+
+    confirmBtn?.addEventListener('click', async () => {
+      const code = (document.getElementById('forgotCode')?.value || '').trim();
+      const newPass = (document.getElementById('forgotNewPass')?.value || '').trim();
+
+      if (!code || code.length < 6) { UI.showToast("6 xonali tasdiqlash kodini to'liq kiriting", 'error'); return; }
+      if (!newPass || newPass.length < 6) { UI.showToast("Yangi parol kamida 6 ta belgidan iborat bo'lishi kerak", 'error'); return; }
+
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Saqlanmoqda...';
+
+      try {
+        const res = await window.Api.confirmPasswordReset(resetEmail, code, newPass);
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Saqlash va kirish';
+
+        overlay.classList.remove('active');
+        UI.showToast("Parolingiz muvaffaqiyatli yangilandi!", "success");
+
+        if (res && res.user) {
+          Store.setUser(res.user);
+          setTimeout(() => location.href = 'book_list.html', 500);
+        }
+      } catch (err) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Saqlash va kirish';
+        UI.showToast(err.message || "Parolni yangilashda xatolik", "error");
+      }
     });
   },
 

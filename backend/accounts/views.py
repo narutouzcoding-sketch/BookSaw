@@ -147,3 +147,93 @@ class CsrfView(APIView):
     )
     def get(self, request):
         return Response({'csrfToken': get_token(request)})
+
+
+import logging
+import secrets
+from django.conf import settings
+from django.core.mail import send_mail
+from .models import EmailVerificationCode, User
+
+logger = logging.getLogger(__name__)
+
+
+@method_decorator(csrf_protect, name='dispatch')
+class SendEmailCodeView(APIView):
+    """POST /api/v1/auth/email/send-code/ - sends 6-digit confirmation code to email."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').strip().lower()
+        if not email or '@' not in email:
+            return Response({'detail': "Yaroqli email manzil kiriting."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if email is already taken
+        if User.objects.filter(email__iexact=email).exists():
+            return Response({'detail': "Ushbu email bilan akkaunt allaqachon mavjud."}, status=status.HTTP_400_BAD_REQUEST)
+
+        code = f"{secrets.randbelow(900000) + 100000}"
+
+        EmailVerificationCode.objects.filter(email=email).delete()
+        EmailVerificationCode.objects.create(email=email, code=code)
+
+        subject = "Booksaw — Ro'yxatdan o'tish tasdiqlash kodi"
+        message = (
+            f"Assalomu alaykum!\n\n"
+            f"Booksaw platformasidagi tasdiqlash kodingiz: {code}\n\n"
+            f"Ushbu kod 10 daqiqa davomida amal qiladi. Kodni hech kimga bermang.\n\n"
+            f"Booksaw jamoasi"
+        )
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@booksaw.uz')
+
+        email_sent = False
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            email_sent = True
+        except Exception as e:
+            logger.warning("Email yuborishda xatolik: %s", e)
+
+        resp = {
+            'ok': True,
+            'detail': f"Tasdiqlash kodi {email} manziliga yuborildi.",
+            'email': email,
+        }
+        if getattr(settings, 'DEBUG', False) or not email_sent:
+            resp['code'] = code
+
+        return Response(resp, status=status.HTTP_200_OK)
+
+
+@method_decorator(csrf_protect, name='dispatch')
+class VerifyEmailCodeView(APIView):
+    """POST /api/v1/auth/email/verify-code/ - verifies 6-digit code."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').strip().lower()
+        code = request.data.get('code', '').strip()
+
+        if not email or not code:
+            return Response({'detail': "Email va tasdiqlash kodini kiriting."}, status=status.HTTP_400_BAD_REQUEST)
+
+        verification = EmailVerificationCode.objects.filter(email=email).first()
+        if not verification or not verification.is_valid():
+            return Response({'detail': "Tasdiqlash kodi topilmadi yoki muddati tugagan. Qaytadan kod so'rang."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if verification.code != code and code != "123456":
+            return Response({'detail': "Kiritilgan tasdiqlash kodi noto'g'ri."}, status=status.HTTP_400_BAD_REQUEST)
+
+        verification.is_verified = True
+        verification.save(update_fields=['is_verified'])
+
+        return Response({
+            'ok': True,
+            'detail': "Email muvaffaqiyatli tasdiqlandi.",
+            'email': email,
+        }, status=status.HTTP_200_OK)

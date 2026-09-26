@@ -868,6 +868,244 @@ const UI = {
     verifyBtn?.addEventListener('click', verifyOtp);
   },
 
+  showEmailAuthModal(regPayload, onSuccess, onCancel) {
+    const email = regPayload.email;
+    let countdownInterval = null;
+    let cachedCode = '';
+
+    const html = `
+      <div class="telegram-auth-box">
+        <div class="tg-badge-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        </div>
+
+        <div>
+          <h3 style="font-size:22px;font-weight:700;margin:0 0 6px;color:var(--text-primary);">Emailni tasdiqlash</h3>
+          <p style="font-size:14px;color:var(--text-muted);margin:0 0 8px;">
+            Tasdiqlash kodi quyidagi elektron pochtaga yuborildi:
+          </p>
+          <div style="margin-bottom:16px;">
+            <strong style="font-size:15px;color:var(--primary);">${escapeHtml(email)}</strong>
+          </div>
+
+          <div class="tg-otp-grid">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="email-otp-box tg-otp-box" data-idx="0" autofocus autocomplete="one-time-code">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="email-otp-box tg-otp-box" data-idx="1">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="email-otp-box tg-otp-box" data-idx="2">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="email-otp-box tg-otp-box" data-idx="3">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="email-otp-box tg-otp-box" data-idx="4">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="email-otp-box tg-otp-box" data-idx="5">
+          </div>
+
+          <div id="emailOtpError" style="display:none;color:#ef4444;font-size:13px;margin:8px 0 14px;font-weight:600;"></div>
+          <div id="emailOtpNotice" style="display:none;padding:10px 12px;border-radius:10px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-muted);font-size:12px;margin:10px 0 16px;"></div>
+
+          <div class="tg-timer-text" style="margin-top:12px;">
+            Kodni qayta yuborish: <span class="tg-timer-count" id="emailTimerCount">00:59</span>
+            <button type="button" id="emailResendBtn" style="display:none;background:none;border:none;color:#2563eb;font-weight:600;cursor:pointer;text-decoration:underline;margin-left:6px;">Qayta yuborish</button>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="emailVerifyBtn" style="width:100%;background:var(--primary);border-color:var(--primary);font-size:15px;font-weight:600;height:46px;margin-top:14px;">
+            Tasdiqlash va ro'yxatdan o'tish
+          </button>
+        </div>
+      </div>
+    `;
+
+    const modalRes = this.showModal(html, {
+      className: 'modal--telegram-auth',
+      onClose: () => {
+        if (countdownInterval) clearInterval(countdownInterval);
+        if (typeof onCancel === 'function') onCancel();
+      }
+    });
+
+    const otpBoxes = Array.from(document.querySelectorAll('.email-otp-box'));
+    const otpError = document.getElementById('emailOtpError');
+    const otpNotice = document.getElementById('emailOtpNotice');
+    const timerCount = document.getElementById('emailTimerCount');
+    const resendBtn = document.getElementById('emailResendBtn');
+    const verifyBtn = document.getElementById('emailVerifyBtn');
+
+    // Timer logic
+    const startTimer = () => {
+      if (countdownInterval) clearInterval(countdownInterval);
+      let secondsLeft = 59;
+      if (timerCount) {
+        timerCount.textContent = '00:59';
+        timerCount.style.display = '';
+      }
+      if (resendBtn) resendBtn.style.display = 'none';
+
+      countdownInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(countdownInterval);
+          if (timerCount) timerCount.style.display = 'none';
+          if (resendBtn) resendBtn.style.display = 'inline';
+        } else {
+          const s = secondsLeft < 10 ? '0' + secondsLeft : secondsLeft;
+          if (timerCount) timerCount.textContent = '00:' + s;
+        }
+      }, 1000);
+    };
+
+    // Dispatch code function
+    const dispatchCode = async () => {
+      try {
+        let res = { ok: true };
+        if (window.Api && !window.Api.isMock()) {
+          res = await window.Api.sendEmailVerification(email);
+        } else {
+          res = { ok: true, code: '123456' };
+        }
+        if (res && res.code) cachedCode = res.code;
+        startTimer();
+
+        if (otpNotice) {
+          otpNotice.innerHTML = res && res.code
+            ? `Tasdiqlash kodi emailingizga yuborildi. (Sinov uchun kod: <strong>${res.code}</strong>)`
+            : `Tasdiqlash kodi emailingizga yuborildi. Iltimos, pochtangizni tekshiring.`;
+          otpNotice.style.display = 'block';
+          otpNotice.style.borderColor = 'var(--primary)';
+          otpNotice.style.color = 'var(--text-primary)';
+        }
+        UI.showToast("Tasdiqlash kodi emailingizga yuborildi!", "success");
+      } catch (err) {
+        if (otpError) {
+          otpError.textContent = err.message || "Emailga kod yuborishda xatolik yuz berdi.";
+          otpError.style.display = 'block';
+        }
+        UI.showToast(err.message || "Kod yuborishda xatolik", "error");
+      }
+    };
+
+    // Initial send
+    dispatchCode();
+
+    resendBtn?.addEventListener('click', () => {
+      dispatchCode();
+    });
+
+    // Boxes inputs
+    otpBoxes.forEach((box, idx) => {
+      box.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val ? val[0] : '';
+        if (val) {
+          box.classList.add('is-filled');
+          box.classList.remove('is-error');
+          if (idx < otpBoxes.length - 1) {
+            otpBoxes[idx + 1].focus();
+          } else {
+            const allVal = otpBoxes.map(b => b.value).join('');
+            if (allVal.length === 6) verifyCode();
+          }
+        } else {
+          box.classList.remove('is-filled');
+        }
+        if (otpError) otpError.style.display = 'none';
+      });
+
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && idx > 0) {
+          otpBoxes[idx - 1].focus();
+          otpBoxes[idx - 1].value = '';
+          otpBoxes[idx - 1].classList.remove('is-filled');
+        } else if (e.key === 'ArrowLeft' && idx > 0) {
+          otpBoxes[idx - 1].focus();
+        } else if (e.key === 'ArrowRight' && idx < otpBoxes.length - 1) {
+          otpBoxes[idx + 1].focus();
+        } else if (e.key === 'Enter') {
+          verifyCode();
+        }
+      });
+
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        if (!text) return;
+        for (let i = 0; i < otpBoxes.length; i++) {
+          if (text[i]) {
+            otpBoxes[i].value = text[i];
+            otpBoxes[i].classList.add('is-filled');
+          }
+        }
+        const lastIdx = Math.min(text.length - 1, otpBoxes.length - 1);
+        if (lastIdx >= 0) otpBoxes[lastIdx].focus();
+        if (text.length >= 6) verifyCode();
+      });
+    });
+
+    // Verify code
+    const verifyCode = async () => {
+      const code = otpBoxes.map(b => b.value).join('');
+      if (code.length < 6) {
+        if (otpError) {
+          otpError.textContent = "Iltimos, 6 xonali tasdiqlash kodini to'liq kiriting.";
+          otpError.style.display = 'block';
+        }
+        return;
+      }
+
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Tekshirilmoqda...';
+
+      try {
+        if (window.Api && !window.Api.isMock()) {
+          await window.Api.verifyEmailVerification(email, code);
+          // Register user in backend API
+          try {
+            await window.Api.register({
+              name: regPayload.name,
+              email: regPayload.email,
+              password: regPayload.password,
+              first_name: regPayload.name,
+              phone: regPayload.phone
+            });
+          } catch (regErr) {
+            console.warn('Backend register note:', regErr);
+          }
+        } else {
+          if (cachedCode && code !== cachedCode && code !== '123456') {
+            throw new Error("Tasdiqlash kodi noto'g'ri.");
+          }
+        }
+
+        // Register in client Store
+        Store.register(regPayload.name, regPayload.email, regPayload.phone, regPayload.password);
+
+        if (countdownInterval) clearInterval(countdownInterval);
+        verifyBtn.innerHTML = '✅ Tasdiqlandi!';
+        otpBoxes.forEach(b => {
+          b.style.borderColor = 'var(--primary)';
+          b.style.background = 'var(--bg-hover)';
+        });
+
+        setTimeout(() => {
+          modalRes.close();
+          UI.showToast("Email tasdiqlandi va hisob ochildi!", "success");
+          if (typeof onSuccess === 'function') onSuccess();
+        }, 500);
+
+      } catch (err) {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "Tasdiqlash va ro'yxatdan o'tish";
+        if (otpError) {
+          otpError.textContent = err.message || "Tasdiqlash kodi noto'g'ri.";
+          otpError.style.display = 'block';
+        }
+        otpBoxes.forEach(b => {
+          b.classList.add('is-error');
+          setTimeout(() => b.classList.remove('is-error'), 500);
+        });
+        otpBoxes[0]?.focus();
+      }
+    };
+
+    verifyBtn?.addEventListener('click', verifyCode);
+  },
+
   showSocialCompleteModal(initialData = {}, onSuccess) {
     const provider = initialData.provider || 'social';
     const isGoogle = provider === 'google';

@@ -6320,13 +6320,12 @@ h1, h2 {
   .product-carousel .product-card { flex: 0 0 min(200px, 72vw); }
 }
 
-@view-transition { navigation: auto; }
-::view-transition-old(root) { animation: vt-fade .22s ease both; }
-::view-transition-new(root) { animation: vt-fade .28s ease both reverse; }
+/* View transitions disabled for multi-page static navigation to avoid InvalidStateError */
 @keyframes vt-fade {
   from { opacity: 1; }
   to { opacity: 0; }
 }
+
 
 .hero.is-dragging,
 .product-carousel.is-dragging,

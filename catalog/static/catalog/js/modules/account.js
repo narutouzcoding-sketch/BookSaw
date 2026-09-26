@@ -153,20 +153,39 @@ const Auth = {
       }
       if (!valid) { this.shake(form); return; }
 
+      const phoneVal = phoneEl ? phoneEl.value : '';
+      const regPayload = {
+        name: nameEl.value,
+        email: emailEl.value,
+        phone: phoneVal,
+        password: passEl.value
+      };
+
       const btn = document.getElementById('registerBtn');
+      const originalText = btn ? btn.innerHTML : "Ro'yxatdan o'tish";
       if (btn) {
         btn.disabled = true;
-        btn.classList.add('success');
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> SUCCESS';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kod yuborilmoqda...';
       }
-      setTimeout(() => {
-        const phoneVal = phoneEl ? phoneEl.value : '';
-        Store.register(nameEl.value, emailEl.value, phoneVal, passEl.value);
-        UI.showToast("Hisob muvaffaqiyatli ochildi!");
-        const params = new URLSearchParams(location.search);
-        const redirectUrl = params.get('redirect') || 'book_list.html';
-        this.showSuccess(() => { location.href = redirectUrl; });
-      }, 700);
+
+      UI.showEmailAuthModal(
+        regPayload,
+        () => {
+          if (btn) {
+            btn.classList.add('success');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> SUCCESS';
+          }
+          const params = new URLSearchParams(location.search);
+          const redirectUrl = params.get('redirect') || 'book_list.html';
+          this.showSuccess(() => { location.href = redirectUrl; });
+        },
+        () => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+          }
+        }
+      );
     });
 
     ['regName', 'regEmail', 'regPhone', 'regPassword', 'regConfirm'].forEach(id => {
@@ -297,15 +316,6 @@ const Auth = {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const kind = btn.dataset.social;
-        if (window.APP_CONFIG && !window.APP_CONFIG.USE_MOCK) {
-          try {
-            const url = window.Api?.socialAuthStart(kind);
-            if (url) {
-              location.assign(url);
-              return;
-            }
-          } catch (err) { /* fallback to interactive modals */ }
-        }
         if (kind === 'google') {
           UI.startGoogleOAuth();
         } else if (kind === 'telegram') {

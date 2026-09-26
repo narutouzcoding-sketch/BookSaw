@@ -16,13 +16,15 @@ window.APP_CONFIG = {
   SUPPORT_PHONE: "+998 (71) 200-00-00",
   SUPPORT_EMAIL: "info@bookscatalog.uz",
   // Public backend routes & OAuth settings
-  AUTH_GOOGLE_START: "/api/auth/google/start",
-  AUTH_TELEGRAM_START: "/api/auth/telegram/start",
+  AUTH_GOOGLE_START: "/auth/google/start/",
+  AUTH_TELEGRAM_START: "/auth/telegram/send-otp/",
+  // Email verification endpoints
+  EMAIL_CODE_SEND: "/auth/email/send-code/",
+  EMAIL_CODE_VERIFY: "/auth/email/verify-code/",
   // Telegram sozlamalari. Bot token va chat ID FAQAT backendning .env faylida turadi.
-  // Hech qachon maxfiy kalitlarni brauzerga yubormang.
   TELEGRAM_BOT_USERNAME: "BooksawUzBot",
-  TELEGRAM_OTP_SEND: "/api/auth/telegram/send-otp",
-  TELEGRAM_OTP_VERIFY: "/api/auth/telegram/verify-otp",
+  TELEGRAM_OTP_SEND: "/auth/telegram/send-otp/",
+  TELEGRAM_OTP_VERIFY: "/auth/telegram/verify-otp/",
   // Google Cloud Console Client ID
   GOOGLE_CLIENT_ID: "1070282903830-8ineagga21j7c7im6mgieuq5ikud911b.apps.googleusercontent.com"
 };

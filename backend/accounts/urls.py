@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import CsrfView, LoginView, LogoutView, MeView, RegisterView
+from .views import (
+    CsrfView, LoginView, LogoutView, MeView, RegisterView,
+    SendEmailCodeView, VerifyEmailCodeView,
+)
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='auth-register'),
@@ -12,4 +15,8 @@ urlpatterns = [
     path('me', MeView.as_view()),
     path('csrf/', CsrfView.as_view(), name='auth-csrf'),
     path('csrf', CsrfView.as_view()),
+    path('email/send-code/', SendEmailCodeView.as_view(), name='auth-email-send-code'),
+    path('email/send-code', SendEmailCodeView.as_view()),
+    path('email/verify-code/', VerifyEmailCodeView.as_view(), name='auth-email-verify-code'),
+    path('email/verify-code', VerifyEmailCodeView.as_view()),
 ]

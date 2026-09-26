@@ -672,15 +672,33 @@
       localStorage.setItem("marketplace_newsletter", JSON.stringify(list));
       return { ok: true };
     },
+    async sendEmailVerification(email) {
+      if (this.isMock()) return { ok: true, mock: true, code: '123456' };
+      await this.ensureCsrfCookie();
+      const endpoint = (window.APP_CONFIG && APP_CONFIG.EMAIL_CODE_SEND) || '/auth/email/send-code/';
+      return this.request(endpoint, {
+        method: "POST", body: JSON.stringify({ email })
+      });
+    },
+    async verifyEmailVerification(email, code) {
+      if (this.isMock()) return { ok: true, mock: true };
+      await this.ensureCsrfCookie();
+      const endpoint = (window.APP_CONFIG && APP_CONFIG.EMAIL_CODE_VERIFY) || '/auth/email/verify-code/';
+      return this.request(endpoint, {
+        method: "POST", body: JSON.stringify({ email, code })
+      });
+    },
     async sendTelegramOtp(phone) {
       if (this.isMock()) return { ok: true, mock: true };
-      return this.request((window.APP_CONFIG && APP_CONFIG.TELEGRAM_OTP_SEND) || '', {
+      await this.ensureCsrfCookie();
+      return this.request((window.APP_CONFIG && APP_CONFIG.TELEGRAM_OTP_SEND) || '/auth/telegram/send-otp/', {
         method: "POST", body: JSON.stringify({ phone })
       });
     },
     async verifyTelegramOtp(phone, code) {
       if (this.isMock()) return { ok: false };
-      return this.request((window.APP_CONFIG && APP_CONFIG.TELEGRAM_OTP_VERIFY) || '', {
+      await this.ensureCsrfCookie();
+      return this.request((window.APP_CONFIG && APP_CONFIG.TELEGRAM_OTP_VERIFY) || '/auth/telegram/verify-otp/', {
         method: "POST", body: JSON.stringify({ phone, code })
       });
     },

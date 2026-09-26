@@ -140,3 +140,29 @@ class TestOAuthCleanupCommand:
 
         assert not OAuthState.objects.filter(state='old_1').exists()
         assert OAuthState.objects.filter(state='fresh_1').exists()
+
+
+@pytest.mark.django_db
+class TestTelegramOTP:
+    def test_send_telegram_otp_success(self, api_client):
+        res = api_client.post('/api/auth/telegram/send-otp/', {'phone': '+998901234567'}, format='json')
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data['ok'] is True
+        from social_auth.models import TelegramOTP
+        assert TelegramOTP.objects.filter(phone='998901234567').exists()
+
+    def test_verify_telegram_otp_success(self, api_client):
+        from social_auth.models import TelegramOTP
+        TelegramOTP.objects.create(phone='998901234567', code_hash='888999')
+        res = api_client.post('/api/auth/telegram/verify-otp/', {'phone': '+998901234567', 'code': '888999'}, format='json')
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data['ok'] is True
+        assert 'user' in res.data
+        assert 'sessionid' in res.cookies
+
+    def test_verify_telegram_otp_invalid_fails(self, api_client):
+        from social_auth.models import TelegramOTP
+        TelegramOTP.objects.create(phone='998901234567', code_hash='888999')
+        res = api_client.post('/api/auth/telegram/verify-otp/', {'phone': '+998901234567', 'code': '000000'}, format='json')
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+

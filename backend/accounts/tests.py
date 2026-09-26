@@ -211,3 +211,36 @@ class TestCartAndWishlistMerge:
         user_wishlist_books = set(WishlistItem.objects.filter(user=user).values_list('book_id', flat=True))
         assert user_wishlist_books == {b1.id, b2.id}
         assert WishlistItem.objects.filter(user=user).count() == 2
+
+
+@pytest.mark.django_db
+class TestEmailVerification:
+    def test_send_email_code_success(self, api_client):
+        res = api_client.post('/api/v1/auth/email/send-code/', {'email': 'verifytest@example.com'}, format='json')
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data['ok'] is True
+        from accounts.models import EmailVerificationCode
+        v = EmailVerificationCode.objects.filter(email='verifytest@example.com').first()
+        assert v is not None
+        assert len(v.code) == 6
+
+    def test_send_email_code_existing_email_fails(self, api_client, user):
+        res = api_client.post('/api/v1/auth/email/send-code/', {'email': user.email}, format='json')
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'mavjud' in res.data['detail']
+
+    def test_verify_email_code_success(self, api_client):
+        from accounts.models import EmailVerificationCode
+        EmailVerificationCode.objects.create(email='codetest@example.com', code='654321')
+        res = api_client.post('/api/v1/auth/email/verify-code/', {'email': 'codetest@example.com', 'code': '654321'}, format='json')
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data['ok'] is True
+        assert EmailVerificationCode.objects.get(email='codetest@example.com').is_verified is True
+
+    def test_verify_email_code_invalid_fails(self, api_client):
+        from accounts.models import EmailVerificationCode
+        EmailVerificationCode.objects.create(email='codetest2@example.com', code='654321')
+        res = api_client.post('/api/v1/auth/email/verify-code/', {'email': 'codetest2@example.com', 'code': '000000'}, format='json')
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'noto\'g\'ri' in res.data['detail']
+

@@ -253,17 +253,27 @@ _email_host = os.getenv("EMAIL_HOST", "smtp.gmail.com").strip()
 _email_port = int(os.getenv("EMAIL_PORT", "587"))
 _email_tls = os.getenv("EMAIL_USE_TLS", "True").lower() in ("true", "1", "t")
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend' if (_email_user or not DEBUG) else 'django.core.mail.backends.console.EmailBackend',
-        'HOST': _email_host,
-        'PORT': _email_port,
-        'USE_TLS': _email_tls,
-        'HOST_USER': _email_user,
-        'HOST_PASSWORD': _email_pass,
-        'TIMEOUT': 10,
+if _email_user or not DEBUG:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'OPTIONS': {
+                'host': _email_host or 'smtp.gmail.com',
+                'port': _email_port,
+                'use_tls': _email_tls,
+                'username': _email_user,
+                'password': _email_pass,
+                'timeout': 10,
+            }
+        }
     }
-}
+else:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        }
+    }
+
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", _email_user or "Booksaw <noreply@booksaw.uz>")
 
 # ---------------------------------------------------------------------------

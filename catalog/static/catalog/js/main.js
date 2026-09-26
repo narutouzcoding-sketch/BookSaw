@@ -45,15 +45,7 @@ import {
 /* ========================================================================
    14. PAGE INITIALIZATION
    ======================================================================== */
-document.addEventListener('DOMContentLoaded', async () => {
-  // Backend rejimida (USE_MOCK: false) bu yerda haqiqiy so'rov ketadi va
-  // window.PRODUCTS / window.CATEGORIES backend natijasi bilan almashtiriladi.
-  // Mock rejimida yoki xatolik bo'lsa, funksiya darhol qaytadi va data.js
-  // dagi statik massivlar ishlatilaveradi — sahifa hech qachon "osilib qolmaydi".
-  if (window.Api && window.Api.bootstrapData) {
-    await window.Api.bootstrapData();
-  }
-
+document.addEventListener('DOMContentLoaded', () => {
   Theme.mount();
   initHeader();
   UI.updateBadges();
@@ -97,6 +89,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   Animations.initScrollReveal();
   enhanceChrome();
+
+  // Asinxron tarzda backenddan mahsulotlarni yangilash (sahifa qotib qolmasligi uchun fonda bajariladi)
+  if (window.Api && window.Api.bootstrapData && (page === 'home' || page === 'catalog')) {
+    window.Api.bootstrapData().then(() => {
+      try {
+        if (page === 'home' && !catalogQuery) initHomePage();
+        else if (page === 'catalog' || (page === 'home' && catalogQuery)) initCatalogPage();
+      } catch (e) {
+        console.warn('Silent refresh error:', e);
+      }
+    }).catch(err => {
+      console.warn('Background bootstrap note:', err);
+    });
+  }
 });
 
 // BFCache (Back-Forward Cache): Brauzer orqaga/oldinga tugmalari bosilganda savat va nishonlarni yangilash

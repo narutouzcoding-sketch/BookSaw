@@ -692,21 +692,6 @@ const UI = {
       }
       return directSuccess;
     };
-        UI.showToast("Telegram botiga kod yuborishda xatolik: " + apiDesc, "error");
-        if (otpNotice) {
-          otpNotice.innerHTML = `
-            <div style="text-align:left;line-height:1.5;">
-              <div style="color:#ef4444;font-weight:600;margin-bottom:4px;">⚠️ Telegram Bot holati: ${escapeHtml(apiDesc)}</div>
-              <div style="color:var(--text-muted);font-size:12px;">
-                Iltimos, avval Telegram ilovangizda <strong>@${escapeHtml(botUser)}</strong> botini ochib <strong>/start</strong> tugmasini bosing va qaytadan kod so'rang.
-              </div>
-            </div>`;
-          otpNotice.style.display = 'block';
-          otpNotice.style.borderColor = '#ef4444';
-        }
-      }
-      return directSuccess;
-    };
 
     // Step 1 -> Step 2
     sendOtpBtn?.addEventListener('click', async () => {
